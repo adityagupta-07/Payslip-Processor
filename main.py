@@ -22,30 +22,4 @@ print(user_input())
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # print(user_input())
-
-# my_dict = user_input()
-
-# doc = Document("./Templates/Template.docx")
-# docx_replace(doc, **my_dict)
