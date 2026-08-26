@@ -20,12 +20,32 @@ def user_input():
 
 user_input = user_input()
 
+workbook = openpyxl.load_workbook(user_input["file_path"], data_only=True)
+sheet = workbook.active
 
-wb_obj = openpyxl.load_workbook(user_input["file_path"])
-sheet_obj = wb_obj.active
+def row_range_per_employee_block(search_string):
+    matching_rows = []
+    for target_row in sheet.iter_rows():
+        for cell in target_row:
+            if cell.value == search_string:
+                if cell.row not in matching_rows:
+                    matching_rows.append(cell.row)
+    return matching_rows
 
-row = sheet_obj.max_row
-column = sheet_obj.max_column
 
-print("Total Rows:", row)
-print("Total Columns:", column)
+employee_information_row_numbers = row_range_per_employee_block("EMPLOYEE INFORMATION")
+net_salary_paid_row_numbers = row_range_per_employee_block("Net Salary Paid")
+
+employee_block = list(zip(employee_information_row_numbers, net_salary_paid_row_numbers))
+
+
+for employee in employee_block:
+    print(f"Employee block: {employee}") # employee = (1, 19) tuple 
+    for r in range(employee[0], employee[1] + 1): # r loops from 1 to 19
+        for c in sheet[r]: # c loops through the cells in row(r), means row(1), row(2), row(3), ...
+            target_cell = c
+            if target_cell.value is not None:
+                print(target_cell.value)
+
+
+
