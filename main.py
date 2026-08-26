@@ -51,7 +51,6 @@ data_dict = {
     "SSF Contribution by Employer": "",
     "Bonus": "",
     "Total": "",
-    "SSF Contribution by Employer": "",
     "SSF Contribution by Employee": "", 
     "TDS for the month": "", 
     "Total Deduction": "", 
@@ -68,16 +67,29 @@ data_dict = {
     "Method": ""
 }
 
+data_dict1 = {
+    "SSF Contribution by Employer": "",
+    "Financial_Year_Note": ""
+}
+
 
 for employee in employee_block:
     print(f"Employee block: {employee}") # employee = (1, 19) tuple 
+# employee = (44, 62)
+    found_ssf_contribution_by_employer = False
     for r in range(employee[0], employee[1] + 1): # r loops from 1 to 19
         for target_cell in sheet[r]: # target_cell loops through the cells in row(r), means row(1), row(2), row(3), ...
             target_value = target_cell.value.strip() if isinstance(target_cell.value, str) else target_cell.value            
             if target_value in data_dict:
                 next_cell = sheet.cell(row=r, column=(target_cell.column+1))
+                if found_ssf_contribution_by_employer is True and "SSF Contribution by Employer" in target_value:
+                    data_dict1[target_value] = next_cell.value
+                    break
+                if "SSF Contribution by Employer" in target_value:
+                    found_ssf_contribution_by_employer = True
+                    data_dict1["Financial_Year_Note"] = sheet.cell(row=r, column=(target_cell.column+2)).value
                 data_dict[target_value] = next_cell.value
                 
 
     print(data_dict)   
-
+    print(data_dict1)
