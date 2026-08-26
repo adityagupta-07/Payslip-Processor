@@ -2,6 +2,7 @@ from python_docx_replace import docx_replace
 from docx import Document
 from datetime import datetime
 import calendar
+import openpyxl
 
 def user_input():
     file_path = input("Provide file path: ")
@@ -12,13 +13,39 @@ def user_input():
     month = input(f"Current month: {calendar.month_name[current_month_num]}. \nEnter month in number to overwrite or press enter to skip: ")
     current_month_num = int(month) if month != "" else current_month_num
     return {
-        "file_path": file_path,
+        "file_path": file_path.replace('"', ''),
         "year": current_year,
         "month": calendar.month_name[current_month_num]
     }
 
-print(user_input())
+user_input = user_input()
 
+workbook = openpyxl.load_workbook(user_input["file_path"], data_only=True)
+sheet = workbook.active
+
+def row_range_per_employee_block(search_string):
+    matching_rows = []
+    for target_row in sheet.iter_rows():
+        for cell in target_row:
+            if cell.value == search_string:
+                if cell.row not in matching_rows:
+                    matching_rows.append(cell.row)
+    return matching_rows
+
+
+employee_information_row_numbers = row_range_per_employee_block("EMPLOYEE INFORMATION")
+net_salary_paid_row_numbers = row_range_per_employee_block("Net Salary Paid")
+
+employee_block = list(zip(employee_information_row_numbers, net_salary_paid_row_numbers))
+
+
+for employee in employee_block:
+    print(f"Employee block: {employee}") # employee = (1, 19) tuple 
+    for r in range(employee[0], employee[1] + 1): # r loops from 1 to 19
+        for c in sheet[r]: # c loops through the cells in row(r), means row(1), row(2), row(3), ...
+            target_cell = c
+            if target_cell.value is not None:
+                print(target_cell.value)
 
 
 
