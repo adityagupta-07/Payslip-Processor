@@ -1,15 +1,22 @@
 from python_docx_replace import docx_replace
 from docx import Document
+from docxtpl import DocxTemplate
 from datetime import datetime
 import calendar
 import openpyxl
+import shutil
+import os
 
+current_month_num = 1
+current_year = 0
 def user_input():
     file_path = input("Provide file path: ")
+    global current_year 
     current_year = datetime.now().year
+    global current_month_num 
     current_month_num = int(datetime.now().month)
     year = input(f"Current year: {current_year}. \nEnter year to overwrite or press enter to skip: ")  
-    current_year = year if year != "" else current_year
+    current_year = int(year) if year != "" else current_year
     month = input(f"Current month: {calendar.month_name[current_month_num]}. \nEnter month in number to overwrite or press enter to skip: ")
     current_month_num = int(month) if month != "" else current_month_num
     return {
@@ -31,7 +38,6 @@ def row_range_per_employee_block(search_string):
                 if cell.row not in matching_rows:
                     matching_rows.append(cell.row)
     return matching_rows
-
 
 employee_information_row_numbers = row_range_per_employee_block("EMPLOYEE INFORMATION")
 net_salary_paid_row_numbers = row_range_per_employee_block("Net Salary Paid")
@@ -63,8 +69,7 @@ data_dict = {
     "Annual SSF deposit": "",
     "Annual TDS Payment": "",
     "Annual Net Salary": "",
-    "Month": "",
-    "Method": ""
+    "Month": ""
 }
 
 data_dict1 = {
@@ -72,10 +77,46 @@ data_dict1 = {
     "Financial_Year_Note": ""
 }
 
+def placeholders_docx_with_id():
+    return {
+        "MONTH_YEAR_UPPER": f"{user_input["month"].upper()} {user_input["year"]}",
+        "EMPLOYEE_ID": data_dict["Employee ID"], 
+        "EMPLOYEE_NAME": data_dict["Employee Name"], 
+        "DESIGNATION": data_dict["Designation"], 
+        "PAN": data_dict["PAN"],
+        "CONTACT_NUMBER": data_dict["Contact Number"], 
+        "BASIC_SALARY": data_dict["Basic Salary"], 
+        "ALLOWANCES": data_dict["Allowances"], 
+        "GROSS_SALARY": data_dict["Gross Salary"], 
+        "GROSS_SALARY_WORKING_HOURS": data_dict["Gross Salary as per working hours"], 
+        "SSF_EMPLOYER": data_dict["SSF Contribution by Employer"], 
+        "BONUS": data_dict["Bonus"], 
+        "TOTAL": data_dict["Total"], 
+        "SSF_EMPLOYER1": data_dict1["SSF Contribution by Employer"], 
+        "SSF_EMPLOYEE": data_dict["SSF Contribution by Employee"], 
+        "TDS_FOR_MONTH": data_dict["TDS for the month"], 
+        "TOTAL_DEDUCTION": data_dict["Total Deduction"], 
+        "NET_SALARY_PAID": data_dict["Net Salary Paid"], 
+        "ACCOUNT_NUMBER": data_dict["Account Number"], 
+        "BANK_NAME": data_dict["Bank Name"], 
+        "BRANCH": data_dict["Branch"], 
+        "MARITAL_STATUS": data_dict["Marital Status"], 
+        "ANNUAL_TAXABLE_SALARY": data_dict["Annual Taxable Salary"], 
+        "ANNUAL_SSF_DEPOSIT": data_dict["Annual SSF deposit"], 
+        "ANNUAL_TDS_PAYMENT": data_dict["Annual TDS Payment"], 
+        "ANNUAL_NET_SALARY": data_dict["Annual Net Salary"], 
+        "FINANCIAL_YEAR_NOTE": data_dict1["Financial_Year_Note"], 
+        "MONTH_YEAR": data_dict["Month"]
+    }
 
+def delete_contents(folder_path):
+    shutil.rmtree(folder_path)
+    os.makedirs(folder_path, exist_ok=True)
+
+delete_contents("Tmp")
+
+emp = 0
 for employee in employee_block:
-    print(f"Employee block: {employee}") # employee = (1, 19) tuple 
-# employee = (44, 62)
     found_ssf_contribution_by_employer = False
     for r in range(employee[0], employee[1] + 1): # r loops from 1 to 19
         for target_cell in sheet[r]: # target_cell loops through the cells in row(r), means row(1), row(2), row(3), ...
@@ -83,13 +124,38 @@ for employee in employee_block:
             if target_value in data_dict:
                 next_cell = sheet.cell(row=r, column=(target_cell.column+1))
                 if found_ssf_contribution_by_employer is True and "SSF Contribution by Employer" in target_value:
-                    data_dict1[target_value] = next_cell.value
+                    data_dict1[target_value] = f"Rs. {next_cell.value:,.2f}"
                     break
                 if "SSF Contribution by Employer" in target_value:
                     found_ssf_contribution_by_employer = True
                     data_dict1["Financial_Year_Note"] = sheet.cell(row=r, column=(target_cell.column+2)).value
-                data_dict[target_value] = next_cell.value
-                
+                if isinstance(next_cell.value, (int, float)) and (r > employee[1]-13 and r < employee[1]+1):
+                    data_dict[target_value] = f"Rs. {next_cell.value:,.2f}"
+                else:
+                    data_dict[target_value] = next_cell.value
+                if r == (employee[1]-2) and target_cell.column == 3:
+                    # next_cell.value is returning <class 'datetime.datetime'> (2026-05-01 00:00:00) so we can change the format (%B = August, %Y = 2026)
+                    data_dict[target_value] = next_cell.value.strftime("%B %Y")
+    placeholder = placeholders_docx_with_id()
+    if data_dict["Employee ID"] != "":
+        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(user_input["year"]).strip()}_{str(data_dict['Employee ID']).strip()}")
+        destination_file = f"Tmp/{file_name}.docx"
+        shutil.copy2("Templates/Template_id.docx", destination_file)    
+        doc = DocxTemplate(destination_file) 
+        doc.render(placeholder)
+        doc.save(destination_file)
+    else:
+        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(user_input["year"]).strip()}")
+        destination_file = f"Tmp/{file_name}.docx"
+        shutil.copy2("Templates/Template_no_id.docx", destination_file)  
+        doc = DocxTemplate(destination_file) 
+        doc.render(placeholder)
+        doc.save(destination_file)
+    data_dict = {key: "" for key in data_dict}
+    data_dict1 = {key: "" for key in data_dict1}
+        
 
-    print(data_dict)   
-    print(data_dict1)
+
+
+
+
