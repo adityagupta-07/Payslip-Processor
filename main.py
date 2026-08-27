@@ -2,6 +2,7 @@ from docxtpl import DocxTemplate
 from datetime import datetime
 import calendar
 import openpyxl
+import shutil
 
 current_month_num = 1
 current_year = 0
@@ -120,15 +121,16 @@ for employee in employee_block:
                 if "SSF Contribution by Employer" in target_value:
                     found_ssf_contribution_by_employer = True
                     data_dict1["Financial_Year_Note"] = sheet.cell(row=r, column=(target_cell.column+2)).value
-                data_dict[target_value] = next_cell.value          
-    # print(f"Employee no.: {emp+1}")
+                data_dict[target_value] = next_cell.value
     emp += 1
     # print(data_dict)   
     # print(data_dict1)
     if data_dict["Employee ID"] != "":
-        print(f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(datetime.now().year).strip()}_{data_dict['Employee ID'].strip()}")
+        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(datetime.now().year).strip()}_{str(data_dict['Employee ID']).strip()}")
+        shutil.copy2("Templates/Template_id.docx", f"Tmp/{file_name}.docx")
     else:
-        print(f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(datetime.now().year).strip()}")
+        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(datetime.now().year).strip()}")
+        shutil.copy2("Templates/Template_no_id.docx", f"Tmp/{file_name}.docx")
 
 
 
