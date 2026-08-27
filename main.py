@@ -3,6 +3,7 @@ from datetime import datetime
 import calendar
 import openpyxl
 import shutil
+import os
 
 current_month_num = 1
 current_year = 0
@@ -13,7 +14,7 @@ def user_input():
     global current_month_num 
     current_month_num = int(datetime.now().month)
     year = input(f"Current year: {current_year}. \nEnter year to overwrite or press enter to skip: ")  
-    current_year = year if year != "" else current_year
+    current_year = int(year) if year != "" else current_year
     month = input(f"Current month: {calendar.month_name[current_month_num]}. \nEnter month in number to overwrite or press enter to skip: ")
     current_month_num = int(month) if month != "" else current_month_num
     return {
@@ -104,6 +105,11 @@ placeholders_docx_with_id = {
     "MONTH_YEAR": data_dict["Month"]
 }
 
+def delete_contents(folder_path):
+    shutil.rmtree(folder_path)
+    os.makedirs(folder_path, exist_ok=True)
+
+delete_contents("Tmp")
 
 emp = 0
 for employee in employee_block:
@@ -122,14 +128,11 @@ for employee in employee_block:
                     found_ssf_contribution_by_employer = True
                     data_dict1["Financial_Year_Note"] = sheet.cell(row=r, column=(target_cell.column+2)).value
                 data_dict[target_value] = next_cell.value
-    emp += 1
-    # print(data_dict)   
-    # print(data_dict1)
     if data_dict["Employee ID"] != "":
-        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(datetime.now().year).strip()}_{str(data_dict['Employee ID']).strip()}")
+        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(user_input["year"]).strip()}_{str(data_dict['Employee ID']).strip()}")
         shutil.copy2("Templates/Template_id.docx", f"Tmp/{file_name}.docx")
     else:
-        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(datetime.now().year).strip()}")
+        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(user_input["year"]).strip()}")
         shutil.copy2("Templates/Template_no_id.docx", f"Tmp/{file_name}.docx")
 
 
