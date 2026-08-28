@@ -2,9 +2,12 @@ from python_docx_replace import docx_replace
 from docx import Document
 from docxtpl import DocxTemplate
 from datetime import datetime
+from docx2pdf import convert
+import dxpdf
 import calendar
 import openpyxl
 import shutil
+import pymupdf
 import os
 
 current_month_num = 1
@@ -114,6 +117,7 @@ def delete_contents(folder_path):
     os.makedirs(folder_path, exist_ok=True)
 
 delete_contents("Tmp")
+delete_contents("PDFs")
 
 emp = 0
 for employee in employee_block:
@@ -153,9 +157,51 @@ for employee in employee_block:
         doc.save(destination_file)
     data_dict = {key: "" for key in data_dict}
     data_dict1 = {key: "" for key in data_dict1}
-        
+
+# Docx to Pdf conversion
+def batch_convert_docx_to_pdf(input_dir, output_dir):
+    # MS Word Independent (but messes up the format)
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".docx") and not filename.startswith("~$"):
+            docx_path = os.path.join(input_dir, filename)
+            pdf_filename = filename.rsplit(".", 1)[0] + ".pdf"
+            pdf_path = os.path.join(output_dir, pdf_filename)
+            
+            try:
+                with open(docx_path, "rb") as f:
+                    docx_bytes = f.read()
+                
+                pdf_bytes = dxpdf.convert(docx_bytes)
+                
+                with open(pdf_path, "wb") as f:
+                    f.write(pdf_bytes)
+                # print(f"Created: {pdf_filename}")
+
+            except Exception as e:
+                print(f"Failed to convert {filename}. Error: {e}")
+
+def batch_convert_docx_to_pdf1(input_dir, output_dir):
+    # MS Word Dependent (Preserves the format)
+    convert(input_dir, output_dir)
 
 
+docs_folder = "./Tmp"
+destination_folder = "./PDFs"
+
+# batch_convert_docx_to_pdf(docs_folder, destination_folder) # MS Word Independent
+batch_convert_docx_to_pdf1(docs_folder, destination_folder) # MS Word Dependent
+
+pdf_name_list = os.listdir(destination_folder)
+
+result = pymupdf.open()
+
+for pdf in pdf_name_list:
+    with pymupdf.open(f"./PDFs/{pdf}") as mfile:
+        result.insert_pdf(mfile)
+
+output_dir = "./Master Pdf"
+output_path = f"{output_dir}/Payslip - {user_input["month"]} {user_input["year"]}.pdf"
 
 
-
+result.save(output_path)
+result.close()
