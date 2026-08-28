@@ -179,13 +179,15 @@ def batch_convert_docx_to_pdf(input_dir, output_dir):
             except Exception as e:
                 print(f"Failed to convert {filename}. Error: {e}")
 
+def batch_convert_docx_to_pdf1(input_dir, output_dir):
     # MS Word Dependent (Preserves the format)
-    # convert(input_dir, output_dir)
+    convert(input_dir, output_dir)
 
 
 docs_folder = "./Tmp"
 destination_folder = "./PDFs"
 
-batch_convert_docx_to_pdf(docs_folder, destination_folder)
+# batch_convert_docx_to_pdf(docs_folder, destination_folder) # MS Word Independent
+batch_convert_docx_to_pdf1(docs_folder, destination_folder) # MS Word Dependent
 
 
