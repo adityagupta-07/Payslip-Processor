@@ -7,6 +7,7 @@ import dxpdf
 import calendar
 import openpyxl
 import shutil
+import pymupdf
 import os
 
 current_month_num = 1
@@ -190,4 +191,17 @@ destination_folder = "./PDFs"
 # batch_convert_docx_to_pdf(docs_folder, destination_folder) # MS Word Independent
 batch_convert_docx_to_pdf1(docs_folder, destination_folder) # MS Word Dependent
 
+pdf_name_list = os.listdir(destination_folder)
 
+result = pymupdf.open()
+
+for pdf in pdf_name_list:
+    with pymupdf.open(f"./PDFs/{pdf}") as mfile:
+        result.insert_pdf(mfile)
+
+output_dir = "./Master Pdf"
+output_path = f"{output_dir}/Payslip - {user_input["month"]} {user_input["year"]}.pdf"
+
+
+result.save(output_path)
+result.close()
