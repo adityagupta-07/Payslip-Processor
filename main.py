@@ -3,6 +3,7 @@ from docx import Document
 from docxtpl import DocxTemplate
 from datetime import datetime
 from docx2pdf import convert
+import dxpdf
 import calendar
 import openpyxl
 import shutil
@@ -115,6 +116,7 @@ def delete_contents(folder_path):
     os.makedirs(folder_path, exist_ok=True)
 
 delete_contents("Tmp")
+delete_contents("PDFs")
 
 emp = 0
 for employee in employee_block:
@@ -154,11 +156,36 @@ for employee in employee_block:
         doc.save(destination_file)
     data_dict = {key: "" for key in data_dict}
     data_dict1 = {key: "" for key in data_dict1}
-        
 
-delete_contents("PDFs")
-# Conversion of each docx file to pdf file
-convert("Tmp/", "PDFs/")
+# Docx to Pdf conversion
+def batch_convert_docx_to_pdf(input_dir, output_dir):
+    # MS Word Independent (but messes up the format)
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".docx") and not filename.startswith("~$"):
+            docx_path = os.path.join(input_dir, filename)
+            pdf_filename = filename.rsplit(".", 1)[0] + ".pdf"
+            pdf_path = os.path.join(output_dir, pdf_filename)
+            
+            try:
+                with open(docx_path, "rb") as f:
+                    docx_bytes = f.read()
+                
+                pdf_bytes = dxpdf.convert(docx_bytes)
+                
+                with open(pdf_path, "wb") as f:
+                    f.write(pdf_bytes)
+                # print(f"Created: {pdf_filename}")
 
+            except Exception as e:
+                print(f"Failed to convert {filename}. Error: {e}")
+
+    # MS Word Dependent (Preserves the format)
+    # convert(input_dir, output_dir)
+
+
+docs_folder = "./Tmp"
+destination_folder = "./PDFs"
+
+batch_convert_docx_to_pdf(docs_folder, destination_folder)
 
 
