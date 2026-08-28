@@ -2,6 +2,7 @@ from python_docx_replace import docx_replace
 from docx import Document
 from docxtpl import DocxTemplate
 from datetime import datetime
+from docx2pdf import convert
 import calendar
 import openpyxl
 import shutil
@@ -155,7 +156,9 @@ for employee in employee_block:
     data_dict1 = {key: "" for key in data_dict1}
         
 
-
+delete_contents("PDFs")
+# Conversion of each docx file to pdf file
+convert("Tmp/", "PDFs/")
 
 
 
