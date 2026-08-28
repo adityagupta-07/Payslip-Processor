@@ -10,22 +10,10 @@ import shutil
 import pymupdf
 import os
 
-current_month_num = 1
-current_year = 0
 def user_input():
     file_path = input("Provide file path: ")
-    global current_year 
-    current_year = datetime.now().year
-    global current_month_num 
-    current_month_num = int(datetime.now().month)
-    year = input(f"Current year: {current_year}. \nEnter year to overwrite or press enter to skip: ")  
-    current_year = int(year) if year != "" else current_year
-    month = input(f"Current month: {calendar.month_name[current_month_num]}. \nEnter month in number to overwrite or press enter to skip: ")
-    current_month_num = int(month) if month != "" else current_month_num
     return {
-        "file_path": file_path.replace('"', ''),
-        "year": current_year,
-        "month": calendar.month_name[current_month_num]
+        "file_path": file_path.replace('"', '')
     }
 
 user_input = user_input()
@@ -82,7 +70,7 @@ data_dict1 = {
 
 def placeholders_docx_with_id():
     return {
-        "MONTH_YEAR_UPPER": f"{user_input["month"].upper()} {user_input["year"]}",
+        "MONTH_YEAR_UPPER": f"{month_name.upper()} {year}",
         "EMPLOYEE_ID": data_dict["Employee ID"], 
         "EMPLOYEE_NAME": data_dict["Employee Name"], 
         "DESIGNATION": data_dict["Designation"], 
@@ -118,9 +106,14 @@ def delete_contents(folder_path):
 
 delete_contents("Tmp")
 delete_contents("PDFs")
+delete_contents("Master Pdf")
 
 emp = 0
+month_name = ""
+year = 0
 for employee in employee_block:
+    data_dict = {key: "" for key in data_dict}
+    data_dict1 = {key: "" for key in data_dict1}
     found_ssf_contribution_by_employer = False
     for r in range(employee[0], employee[1] + 1): # r loops from 1 to 19
         for target_cell in sheet[r]: # target_cell loops through the cells in row(r), means row(1), row(2), row(3), ...
@@ -140,23 +133,23 @@ for employee in employee_block:
                 if r == (employee[1]-2) and target_cell.column == 3:
                     # next_cell.value is returning <class 'datetime.datetime'> (2026-05-01 00:00:00) so we can change the format (%B = August, %Y = 2026)
                     data_dict[target_value] = next_cell.value.strftime("%B %Y")
+                    month_name = next_cell.value.strftime("%B")
+                    year = next_cell.value.strftime("%Y")
     placeholder = placeholders_docx_with_id()
     if data_dict["Employee ID"] != "":
-        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(user_input["year"]).strip()}_{str(data_dict['Employee ID']).strip()}")
+        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}_{str(data_dict['Employee ID']).strip()}")
         destination_file = f"Tmp/{file_name}.docx"
         shutil.copy2("Templates/Template_id.docx", destination_file)    
         doc = DocxTemplate(destination_file) 
         doc.render(placeholder)
         doc.save(destination_file)
     else:
-        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{calendar.month_name[current_month_num].strip()}_{str(user_input["year"]).strip()}")
+        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}")
         destination_file = f"Tmp/{file_name}.docx"
         shutil.copy2("Templates/Template_no_id.docx", destination_file)  
         doc = DocxTemplate(destination_file) 
         doc.render(placeholder)
         doc.save(destination_file)
-    data_dict = {key: "" for key in data_dict}
-    data_dict1 = {key: "" for key in data_dict1}
 
 # Docx to Pdf conversion
 def batch_convert_docx_to_pdf(input_dir, output_dir):
@@ -200,7 +193,7 @@ for pdf in pdf_name_list:
         result.insert_pdf(mfile)
 
 output_dir = "./Master Pdf"
-output_path = f"{output_dir}/Payslip - {user_input["month"]} {user_input["year"]}.pdf"
+output_path = f"{output_dir}/Payslip - {month_name} {year}.pdf"
 
 
 result.save(output_path)
