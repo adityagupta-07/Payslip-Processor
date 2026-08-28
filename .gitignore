@@ -139,3 +139,4 @@ cython_debug/
 Payslips/
 Templates/
 *.docx
+PDFs/
