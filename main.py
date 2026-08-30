@@ -16,12 +16,12 @@ def user_input():
         "file_path": file_path.replace('"', '')
     }
 
-user_input = user_input()
+def load_excel_file(user_input):
+    workbook = openpyxl.load_workbook(user_input["file_path"], data_only=True)
+    sheet = workbook.active
+    return sheet
 
-workbook = openpyxl.load_workbook(user_input["file_path"], data_only=True)
-sheet = workbook.active
-
-def row_range_per_employee_block(search_string):
+def matching_row_numbers(search_string, sheet):
     matching_rows = []
     for target_row in sheet.iter_rows():
         for cell in target_row:
@@ -30,10 +30,16 @@ def row_range_per_employee_block(search_string):
                     matching_rows.append(cell.row)
     return matching_rows
 
-employee_information_row_numbers = row_range_per_employee_block("EMPLOYEE INFORMATION")
-net_salary_paid_row_numbers = row_range_per_employee_block("Net Salary Paid")
+def get_employee_block(string1, string2, sheet):
+    string1_matching_row_numbers = matching_row_numbers(string1, sheet)
+    string2_matching_row_numbers = matching_row_numbers(string2, sheet)
+    employee_block = list(zip(string1_matching_row_numbers, string2_matching_row_numbers))
+    return employee_block
 
-employee_block = list(zip(employee_information_row_numbers, net_salary_paid_row_numbers))
+
+
+
+
 
 data_dict = {
     "Employee ID": "",
@@ -111,14 +117,15 @@ delete_contents("Master Pdf")
 emp = 0
 month_name = ""
 year = 0
-def process_payslips():
-    for employee in employee_block:
+def process_payslips(employee_blocks):
+    for employee in employee_blocks:
+        print(employee)
         global data_dict, data_dict1, month_name, year
         data_dict = {key: "" for key in data_dict}
         data_dict1 = {key: "" for key in data_dict1}
         found_ssf_contribution_by_employer = False
-        for r in range(employee[0], employee[1] + 1): # r loops from 1 to 19
-            for target_cell in sheet[r]: # target_cell loops through the cells in row(r), means row(1), row(2), row(3), ...
+        for r in range(employee[0], employee[1] + 1): # r loops from 1 to 20 (exclusive)
+            for target_cell in sheet[r]: # target_cell loops through all the cells in row(r), means row(1), row(2), row(3), ...
                 target_value = target_cell.value.strip() if isinstance(target_cell.value, str) else target_cell.value            
                 if target_value in data_dict:
                     next_cell = sheet.cell(row=r, column=(target_cell.column+1))
@@ -198,14 +205,20 @@ def master_pdf_creation(destination_folder, month, year):
 docs_folder = "./Tmp"
 destination_folder = "./PDFs"
 
+input_excel_file_path = user_input()
+
+sheet = load_excel_file(input_excel_file_path)
+
+employee_blocks = get_employee_block("EMPLOYEE INFORMATION", "Net Salary Paid", sheet)
+
 # main function call
-process_payslips()
+process_payslips(employee_blocks)
 
 # docx to pdf conversion
 # batch_convert_docx_to_pdf(docs_folder, destination_folder) # MS Word Independent
-batch_convert_docx_to_pdf1(docs_folder, destination_folder) # MS Word Dependent
+# batch_convert_docx_to_pdf1(docs_folder, destination_folder) # MS Word Dependent
 
 # master pdf creation
-master_pdf_creation(destination_folder, month_name, year)
+# master_pdf_creation(destination_folder, month_name, year)
 
 
