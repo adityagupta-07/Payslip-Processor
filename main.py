@@ -111,45 +111,47 @@ delete_contents("Master Pdf")
 emp = 0
 month_name = ""
 year = 0
-for employee in employee_block:
-    data_dict = {key: "" for key in data_dict}
-    data_dict1 = {key: "" for key in data_dict1}
-    found_ssf_contribution_by_employer = False
-    for r in range(employee[0], employee[1] + 1): # r loops from 1 to 19
-        for target_cell in sheet[r]: # target_cell loops through the cells in row(r), means row(1), row(2), row(3), ...
-            target_value = target_cell.value.strip() if isinstance(target_cell.value, str) else target_cell.value            
-            if target_value in data_dict:
-                next_cell = sheet.cell(row=r, column=(target_cell.column+1))
-                if found_ssf_contribution_by_employer is True and "SSF Contribution by Employer" in target_value:
-                    data_dict1[target_value] = f"Rs. {next_cell.value:,.2f}"
-                    break
-                if "SSF Contribution by Employer" in target_value:
-                    found_ssf_contribution_by_employer = True
-                    data_dict1["Financial_Year_Note"] = sheet.cell(row=r, column=(target_cell.column+2)).value
-                if isinstance(next_cell.value, (int, float)) and (r > employee[1]-13 and r < employee[1]+1):
-                    data_dict[target_value] = f"Rs. {next_cell.value:,.2f}"
-                else:
-                    data_dict[target_value] = next_cell.value
-                if r == (employee[1]-2) and target_cell.column == 3:
-                    # next_cell.value is returning <class 'datetime.datetime'> (2026-05-01 00:00:00) so we can change the format (%B = August, %Y = 2026)
-                    data_dict[target_value] = next_cell.value.strftime("%B %Y")
-                    month_name = next_cell.value.strftime("%B")
-                    year = next_cell.value.strftime("%Y")
-    placeholder = placeholders_docx_with_id()
-    if data_dict["Employee ID"] != "":
-        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}_{str(data_dict['Employee ID']).strip()}")
-        destination_file = f"Tmp/{file_name}.docx"
-        shutil.copy2("Templates/Template_id.docx", destination_file)    
-        doc = DocxTemplate(destination_file) 
-        doc.render(placeholder)
-        doc.save(destination_file)
-    else:
-        file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}")
-        destination_file = f"Tmp/{file_name}.docx"
-        shutil.copy2("Templates/Template_no_id.docx", destination_file)  
-        doc = DocxTemplate(destination_file) 
-        doc.render(placeholder)
-        doc.save(destination_file)
+def process_payslips():
+    for employee in employee_block:
+        global data_dict, data_dict1, month_name, year
+        data_dict = {key: "" for key in data_dict}
+        data_dict1 = {key: "" for key in data_dict1}
+        found_ssf_contribution_by_employer = False
+        for r in range(employee[0], employee[1] + 1): # r loops from 1 to 19
+            for target_cell in sheet[r]: # target_cell loops through the cells in row(r), means row(1), row(2), row(3), ...
+                target_value = target_cell.value.strip() if isinstance(target_cell.value, str) else target_cell.value            
+                if target_value in data_dict:
+                    next_cell = sheet.cell(row=r, column=(target_cell.column+1))
+                    if found_ssf_contribution_by_employer is True and "SSF Contribution by Employer" in target_value:
+                        data_dict1[target_value] = f"Rs. {next_cell.value:,.2f}"
+                        break
+                    if "SSF Contribution by Employer" in target_value:
+                        found_ssf_contribution_by_employer = True
+                        data_dict1["Financial_Year_Note"] = sheet.cell(row=r, column=(target_cell.column+2)).value
+                    if isinstance(next_cell.value, (int, float)) and (r > employee[1]-13 and r < employee[1]+1):
+                        data_dict[target_value] = f"Rs. {next_cell.value:,.2f}"
+                    else:
+                        data_dict[target_value] = next_cell.value
+                    if r == (employee[1]-2) and target_cell.column == 3:
+                        # next_cell.value is returning <class 'datetime.datetime'> (2026-05-01 00:00:00) so we can change the format (%B = August, %Y = 2026)
+                        data_dict[target_value] = next_cell.value.strftime("%B %Y")
+                        month_name = next_cell.value.strftime("%B")
+                        year = next_cell.value.strftime("%Y")
+        placeholder = placeholders_docx_with_id()
+        if data_dict["Employee ID"] != "":
+            file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}_{str(data_dict['Employee ID']).strip()}")
+            destination_file = f"Tmp/{file_name}.docx"
+            shutil.copy2("Templates/Template_id.docx", destination_file)    
+            doc = DocxTemplate(destination_file) 
+            doc.render(placeholder)
+            doc.save(destination_file)
+        else:
+            file_name = (f"{data_dict["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}")
+            destination_file = f"Tmp/{file_name}.docx"
+            shutil.copy2("Templates/Template_no_id.docx", destination_file)  
+            doc = DocxTemplate(destination_file) 
+            doc.render(placeholder)
+            doc.save(destination_file)
 
 # Docx to Pdf conversion
 def batch_convert_docx_to_pdf(input_dir, output_dir):
@@ -172,29 +174,38 @@ def batch_convert_docx_to_pdf(input_dir, output_dir):
 
             except Exception as e:
                 print(f"Failed to convert {filename}. Error: {e}")
+    return
 
 def batch_convert_docx_to_pdf1(input_dir, output_dir):
     # MS Word Dependent (Preserves the format)
     convert(input_dir, output_dir)
+    return
+
+def master_pdf_creation(destination_folder, month, year):
+    pdf_name_list = os.listdir(destination_folder)
+    result = pymupdf.open()
+    for pdf in pdf_name_list:
+        with pymupdf.open(f"./PDFs/{pdf}") as mfile:
+            result.insert_pdf(mfile)
+
+    output_dir = "./Master Pdf"
+    output_path = f"{output_dir}/Payslip - {month} {year}.pdf"
+    result.save(output_path)
+    result.close()
+    return
 
 
 docs_folder = "./Tmp"
 destination_folder = "./PDFs"
 
+# main function call
+process_payslips()
+
+# docx to pdf conversion
 # batch_convert_docx_to_pdf(docs_folder, destination_folder) # MS Word Independent
 batch_convert_docx_to_pdf1(docs_folder, destination_folder) # MS Word Dependent
 
-pdf_name_list = os.listdir(destination_folder)
-
-result = pymupdf.open()
-
-for pdf in pdf_name_list:
-    with pymupdf.open(f"./PDFs/{pdf}") as mfile:
-        result.insert_pdf(mfile)
-
-output_dir = "./Master Pdf"
-output_path = f"{output_dir}/Payslip - {month_name} {year}.pdf"
+# master pdf creation
+master_pdf_creation(destination_folder, month_name, year)
 
 
-result.save(output_path)
-result.close()
