@@ -1,43 +1,119 @@
-ULTRA PAYSLIP PRO - ALGORITHM
+# Payslip Generation — Algorithm
 
-1. Ask user for Excel file path, month, year, and optional custom title.
-2. Validate all required inputs are provided; stop with error if not.
-3. Open Excel file and read row by row:
-   - If column A = "EMPLOYEE INFORMATION", save current employee (if any) and start new one.
-   - Store column A->B pairs and column C->D pairs as employee info.
-   - If column C looks like a financial year note and D is empty, save it separately.
-4. Save the last employee after the loop ends.
-5. If no employees found, stop with error.
-6. Check template.docx and template_no_id.docx both exist; stop with error if either missing.
-7. For each employee, prepare data:
-   - Name, employee ID, bank details, basic salary, allowances, deductions, total salary, annual salary.
-   - Clean numbers (remove commas) and format amounts as Rs. X,XXX.XX.
-   - Extract financial year range from note, if available.
-   - Set heading = custom title if given, else month + year.
-   - Keep plain month and year separately too.
-8. For each employee, pick template:
-   - Has employee ID -> template.docx
-   - No employee ID -> template_no_id.docx
-9. For each employee, fill template:
-   - Extract docx (as zip) into temp folder.
-   - Find XML files inside, replace placeholders with actual data.
-   - Repack as new docx named Employee_1, Employee_2, etc.
-10. Merge all individual docx files into one master docx:
-    - Use first employee's docx as base, keep its section settings.
-    - For each remaining employee, add page break then append content, skipping their section settings.
-    - Keep only one final section setting at the end.
-11. Convert master docx to PDF (only once):
-    - Try Microsoft Word first.
-    - If that fails, try LibreOffice headless.
-    - If both fail, stop with error asking to install LibreOffice.
-12. Split master PDF page by page:
-    - Read each page's text to get name, employee ID (if any), month, year.
-    - Build filename: Name_Month_Year_ID.pdf (or Name_Month_Year.pdf without ID).
-    - Replace spaces with underscores, save each page as its own PDF.
-13. Zip all individual PDFs together (no folders) as "Ultra Payslips {Month Year}.zip".
-14. Rename master PDF to "Pay Slip - {Month Year}.pdf".
-15. Create final zip containing renamed master PDF and individual payslips zip.
-16. Save final zip to Downloads:
-    - If a file with same name exists, try appending (1), (2), (3)... until a free name is found.
-17. Report success: number of employees processed and final zip location.
-18. If an error occurs at any step, stop immediately and report what went wrong.
+High-level steps the pipeline follows, from raw Excel sheet to a single merged PDF.
+
+## 1. Get input file
+
+1. Prompt user for Excel file path
+2. Strip any stray quote characters from the path
+3. Return path as a dict: {"file_path": <path>}
+
+
+## 2. Load the sheet
+
+1. Open the workbook with openpyxl (data_only=True, so formulas resolve to values)
+2. Grab the active worksheet
+3. Return the worksheet object
+
+
+## 3. Locate employee blocks
+
+1. Scan every cell in the sheet
+2. Record row numbers where cell value == "EMPLOYEE INFORMATION"  → block start
+3. Record row numbers where cell value == "Net Salary Paid"       → block end
+4. Zip start with end pairwise
+   → produces a list of (start_row, end_row) tuples, one per employee like (1, 19)
+
+
+## 4. Reset the employee dict template
+
+1. Create a fresh copy of the employee dict shape
+   (all values blank, values of nested "duplicates" and "specials" dicts also blank)
+2. Do this once per employee block — never reuse the same dict instance
+
+
+## 5. Extract employee details per block
+
+FOR each (start_row, end_row) block:
+    FOR each row r in range(start_row, end_row + 1):
+        FOR each cell in row r:
+            IF cell value matches a known field name in the employee dict:
+                next_cell = cell to the right
+
+                IF this is a second "SSF Contribution by Employer" match:
+                    store it under data["duplicates"]
+                    stop scanning this row
+
+                IF this is the first "SSF Contribution by Employer" match:
+                    mark it as found
+                    capture the "Financial Year Note" from two columns over
+
+                IF next_cell is numeric AND row is near the end of the block:
+                    format and store as currency ("Rs. X,XXX.XX")
+                ELSE:
+                    store raw value
+
+                IF this is the specific "Month/Year" cell:
+                    capture as a date object (for filenames later)
+                    store formatted display string ("Aug 2026") in the dict
+
+    Append a DEEP COPY of the filled dict to employee_details list
+
+
+## 6. Clear output folders
+
+FOR each folder in [Tmp, PDFs, Master Pdf]:
+    Delete all contents
+
+
+## 7. Build placeholder map per employee
+
+FOR each employee in employee_details:
+    Map every employee field to its corresponding template placeholder key
+    (e.g. "Employee Name" → "EMPLOYEE_NAME", "Basic Salary" → "BASIC_SALARY", ...)
+
+
+## 8. Generate individual DOCX payslips
+
+FOR each employee:
+    1. Choose template:
+         - Template_no_id.docx   IF Employee ID is blank
+         - Template_id.docx      OTHERWISE
+    2. Build output filename from: Name + Month + Year (+ Employee ID if present)
+    3. Copy the chosen template to Tmp/<filename>.docx
+    4. Load it with DocxTemplate
+    5. Render it with the placeholder map from Step 7
+    6. Save
+
+
+## 9. Convert DOCX → PDF (batch)
+
+FOR each .docx file in Tmp (skip temp files starting with "~$"):
+    Convert to PDF, save into PDFs folder
+
+> Two interchangeable strategies:
+> - **Word-dependent** (`docx2pdf.convert`) — preserves formatting, requires MS Word installed
+> - **Word-independent** (`dxpdf.convert`) — portable, messes up formatting
+
+## 10. Merge into a master PDF
+
+1. Open a new blank PDF document
+2. FOR each PDF in the PDFs folder:
+       Insert its pages into the master document
+3. Save merged file as:
+   "Master Pdf/Payslip - <Month> <Year>.pdf"
+
+
+---
+
+## Pipeline order (main.py)
+
+
+user_input()
+  → load_excel_file()
+    → get_employee_block()
+      → delete_contents([Tmp, PDFs, Master Pdf])
+        → FOR each block: new_employee_dict() → get_details_per_employee() → deepcopy → append
+          → FOR each employee: fill_placeholders_in_docx() → docx_creation()
+            → batch_convert_docx_to_pdf1()
+              → master_pdf_creation()
