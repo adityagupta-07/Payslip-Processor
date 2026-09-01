@@ -1,4 +1,6 @@
-def get_employee_block(string1, string2, sheet, matching_row_numbers):
+from excel_reader import matching_row_numbers
+
+def get_employee_block(string1, string2, sheet):
     string1_rows = matching_row_numbers(string1, sheet)
     string2_rows = matching_row_numbers(string2, sheet)
     return list(zip(string1_rows, string2_rows))

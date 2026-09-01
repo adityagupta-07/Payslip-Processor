@@ -12,7 +12,7 @@ def main():
     input_excel_file_path = user_input()
     sheet = load_excel_file(input_excel_file_path)
 
-    employee_blocks = get_employee_block("EMPLOYEE INFORMATION", "Net Salary Paid", sheet, matching_row_numbers)
+    employee_blocks = get_employee_block("EMPLOYEE INFORMATION", "Net Salary Paid", sheet)
 
     delete_contents(["./Tmp", "./PDFs", "./Master Pdf"])
 
