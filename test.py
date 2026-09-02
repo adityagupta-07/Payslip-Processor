@@ -1,10 +1,13 @@
 import tkinter as tk
 import time   
+import threading
 
 def on_button_click():
     print("Task started…")
-    time.sleep(5) # Simulating a long task
-    print("Task finished!")
+    def long_running_task():
+        time.sleep(5) # Simulating a long task
+        print("Task finished!")
+    threading.Thread(target=long_running_task).start()
 
 root = tk.Tk()
 
