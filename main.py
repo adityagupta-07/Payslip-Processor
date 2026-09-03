@@ -34,8 +34,9 @@ def main(input_excel_file_path):
     # batch_convert_docx_to_pdf(docs_folder, destination_folder) # messes up format
     batch_convert_docx_to_pdf1(docs_folder, individual_pdfs_folder) # preserves format
 
+    master_pdf_dir = "./Files/PDFs/Master PDF"
     master_pdf_creation(
-        individual_pdfs_folder,
+        individual_pdfs_folder, master_pdf_dir,
         employee_details[0]["specials"]["Month_year"].strftime("%B"), 
         employee_details[0]["specials"]["Month_year"].strftime("%Y")
     )
