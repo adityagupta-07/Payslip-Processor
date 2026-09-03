@@ -25,13 +25,13 @@ def batch_convert_docx_to_pdf1(input_dir, output_dir):
     convert(input_dir, output_dir)
     return
 
-def master_pdf_creation(destination_folder, month, year):
-    pdf_name_list = os.listdir(destination_folder)
+def master_pdf_creation(individual_pdfs_folder, month, year): 
+    pdf_name_list = os.listdir(individual_pdfs_folder)
     result = pymupdf.open()
     for pdf in pdf_name_list:
-        with pymupdf.open(f"./PDFs/{pdf}") as mfile:
+        with pymupdf.open(f"./Files/PDFs/Individual PDFs/{pdf}") as mfile:
             result.insert_pdf(mfile)
-    output_dir = "./Master Pdf"
+    output_dir = "./Files/PDFs/Master PDF"
     output_path = f"{output_dir}/Payslip - {month} {year}.pdf"
     result.save(output_path)
     result.close()

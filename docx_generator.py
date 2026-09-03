@@ -37,12 +37,12 @@ def docx_creation(employee, placeholders_with_values):
     month_name = employee["specials"]["Month_year"].strftime("%B")
     year = employee["specials"]["Month_year"].strftime("%Y")
     if employee["Employee ID"] == "":
-        template_file = "Templates/Template_no_id.docx"
+        template_file = "Files/Templates/Template_no_id.docx"
         file_name = (f"{employee["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}")
     else:
-        template_file = "Templates/Template_id.docx"
+        template_file = "Files/Templates/Template_id.docx"
         file_name = (f"{employee["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}_{str(employee['Employee ID']).strip()}")
-    destination_file = f"Tmp/{file_name}.docx" 
+    destination_file = f"Files/Docs/{file_name}.docx"  
     shutil.copy2(template_file, destination_file)  
     doc = DocxTemplate(destination_file) 
     doc.render(placeholders_with_values)
