@@ -33,16 +33,16 @@ def fill_placeholders_in_docx(employee):
         "MONTH_YEAR": employee["Month"]
     }
 
-def docx_creation(employee, placeholders_with_values):
+def docx_creation(employee, placeholders_with_values, get_template_id_path, get_template_no_id_path, get_docs_path):
     month_name = employee["specials"]["Month_year"].strftime("%B")
     year = employee["specials"]["Month_year"].strftime("%Y")
     if employee["Employee ID"] == "":
-        template_file = "Files/Templates/Template_no_id.docx"
+        template_file = get_template_no_id_path() 
         file_name = (f"{employee["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}")
     else:
-        template_file = "Files/Templates/Template_id.docx"
+        template_file = get_template_id_path()
         file_name = (f"{employee["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}_{str(employee['Employee ID']).strip()}")
-    destination_file = f"Files/Docs/{file_name}.docx"  
+    destination_file = f"{get_docs_path()}/{file_name}.docx"  
     shutil.copy2(template_file, destination_file)  
     doc = DocxTemplate(destination_file) 
     doc.render(placeholders_with_values)

@@ -142,3 +142,5 @@ Templates/
 *.docx
 PDFs/
 Master Pdf/
+data/
+tests/

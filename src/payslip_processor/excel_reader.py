@@ -4,8 +4,8 @@ def user_input():
     file_path = input("Provide file path: ")
     return file_path.replace('"', '')
 
-def load_excel_file(user_input):
-    workbook = openpyxl.load_workbook(user_input, data_only=True)
+def load_excel_file(input_file_path):
+    workbook = openpyxl.load_workbook(input_file_path, data_only=True)
     return workbook.active
 
 def matching_row_numbers(search_string, sheet):
