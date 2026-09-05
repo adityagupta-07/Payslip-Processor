@@ -50,8 +50,6 @@ pip install -r requirements.txt
 ```
 Payslip Processor/
 ├── data/
-│   ├── input/
-│   │   └── payslip_may.xlsx        # Source payroll workbook (per run input)
 │   └── output/                     # Generated each run, cleared automatically beforehand
 │       ├── docx/                   # Individual DOCX payslips
 │       └── pdf/
@@ -98,7 +96,7 @@ All paths used by the pipeline are centralized in `directories.py`, so moving fo
 
 2. **Click "Browse"** and select the payroll Excel file (`.xlsx`).
 
-3. **Wait for processing.** The status label will show:
+3. **Wait for processing.** Payslip generation runs on a background thread, so the GUI stays fully responsive while it works, no freezing, no "Not Responding" state. The status label will show:
    - `Processing...` while the pipeline runs
    - `Processed!` when it finishes successfully
    - `Failed!` (with an error popup) if something went wrong
