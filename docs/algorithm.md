@@ -2,7 +2,11 @@
 
 High-level steps the pipeline follows, from launching the GUI to producing a single merged PDF.
 
-## 0. Launch the GUI
+## 0. Resolve paths
+
+Before anything else runs, `directories.py` resolves every path the pipeline needs — template locations and the three output folders (DOCX, individual PDFs, master PDF) — as `pathlib.Path` objects built relative to the project root (derived from the module's own file location via `__file__`). Every other module asks `directories.py` for a path rather than hardcoding one, so the app works regardless of which folder it's launched from.
+
+## 1. Launch the GUI
 
 1. `main.py` calls `launch_gui(main, pdfs_folder)` on startup (instead of running `main()` directly)
 2. Build the window:
@@ -13,7 +17,7 @@ High-level steps the pipeline follows, from launching the GUI to producing a sin
 3. Enter the Tkinter main loop and wait for user interaction
 
 
-## 1. Select the input file
+## 2. Select the input file
 
 1. User clicks **Browse**
 2. Open a file-picker dialog filtered to `.xlsx` files
@@ -27,7 +31,7 @@ High-level steps the pipeline follows, from launching the GUI to producing a sin
 > Note: the old terminal prompt (`user_input()`, strip stray quote characters) only runs if `main()` is ever called with `None` directly, bypassing the GUI — not part of the normal GUI flow.
 
 
-## 2. Run the pipeline on a background thread
+## 3. Run the pipeline on a background thread
 
 1. Background thread calls `main(file_path)`
 2. On success → schedule `on_processing_done()` on the main thread
@@ -36,14 +40,14 @@ High-level steps the pipeline follows, from launching the GUI to producing a sin
    This keeps the GUI responsive while the Excel/DOCX/PDF work happens.
 
 
-## 3. Load the sheet
+## 4. Load the sheet
 
 1. Open the workbook with openpyxl (`data_only=True`, so formulas resolve to values)
 2. Grab the active worksheet
 3. Return the worksheet object
 
 
-## 4. Locate employee blocks
+## 5. Locate employee blocks
 
 1. Scan every cell in the sheet
 2. Record row numbers where cell value == "EMPLOYEE INFORMATION" → block start
@@ -52,7 +56,7 @@ High-level steps the pipeline follows, from launching the GUI to producing a sin
    → produces a list of (start_row, end_row) tuples, one per employee, e.g. (1, 19)
 
 
-## 5. Clear output folders
+## 6. Clear output folders
 
 FOR each folder in [Docs, Individual PDFs, Master PDF]:
     Delete all contents and recreate the empty folder
@@ -60,14 +64,14 @@ FOR each folder in [Docs, Individual PDFs, Master PDF]:
 > Runs once, right after blocks are located and before any employee dict is built.
 
 
-## 6. Reset the employee dict template
+## 7. Reset the employee dict template
 
 1. Create a fresh copy of the employee dict shape
    (all fields blank, including nested "duplicates" and "specials" dicts)
 2. Do this once per employee block — never reuse the same dict instance
 
 
-## 7. Extract employee details per block
+## 8. Extract employee details per block
 
 FOR each (start_row, end_row) block:
     FOR each row r in range(start_row, end_row + 1):
@@ -95,14 +99,14 @@ FOR each (start_row, end_row) block:
     Append a DEEP COPY of the filled dict to employee_details list
 
 
-## 8. Build placeholder map per employee
+## 9. Build placeholder map per employee
 
 FOR each employee in employee_details:
     Map every employee field to its corresponding template placeholder key
     (e.g. "Employee Name" → "EMPLOYEE_NAME", "Basic Salary" → "BASIC_SALARY", ...)
 
 
-## 9. Generate individual DOCX payslips
+## 10. Generate individual DOCX payslips
 
 FOR each employee:
     1. Choose template:
@@ -115,7 +119,7 @@ FOR each employee:
     6. Save
 
 
-## 10. Convert DOCX → PDF (batch)
+## 11. Convert DOCX → PDF (batch)
 
 Convert every DOCX in the Docs folder to PDF, saved into the Individual PDFs folder.
 
@@ -124,7 +128,7 @@ Convert every DOCX in the Docs folder to PDF, saved into the Individual PDFs fol
 > - **Word-independent** (`dxpdf.convert`, via `batch_convert_docx_to_pdf`) — portable, but messes up formatting. Defined but unused.
 
 
-## 11. Merge into a master PDF
+## 12. Merge into a master PDF
 
 1. Open a new blank PDF document
 2. FOR each PDF in the Individual PDFs folder:
@@ -133,7 +137,7 @@ Convert every DOCX in the Docs folder to PDF, saved into the Individual PDFs fol
    "Master PDF/Payslip - <Month> <Year>.pdf"
 
 
-## 12. Report result back to the GUI
+## 13. Report result back to the GUI
 
 - **On success:**
   1. Status label → "Processed!"
