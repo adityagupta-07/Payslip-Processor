@@ -24,6 +24,7 @@ All output — the DOCX files, the individual PDFs, and the master PDF — is or
 - 💰 **Automatic currency formatting** — salary figures are formatted as `Rs. X,XXX.XX`.
 - 📦 **One-click access to results** — an "Open File Location" button appears as soon as processing finishes.
 - 🧾 **Master PDF** — every individual payslip is merged into one file named `Payslip - <Month> <Year>.pdf`, ready to archive or share.
+- 🧹 **Clean runs** — output folders are cleared automatically at the start of each run so results never mix between months.
 - ⚠️ **Clear error reporting** — if something goes wrong, you get a readable error message instead of a crash.
 
 
@@ -31,7 +32,7 @@ All output — the DOCX files, the individual PDFs, and the master PDF — is or
 
 - **Windows**, with **Microsoft Word installed** (used to preserve formatting when converting DOCX → PDF)
 - **Python 3.9+**
-- Python packages:
+- Python packages listed in `requirements.txt`:
   - `openpyxl`
   - `docxtpl`
   - `docx2pdf`
@@ -40,35 +41,49 @@ All output — the DOCX files, the individual PDFs, and the master PDF — is or
 Install dependencies:
 
 ```bash
-pip install openpyxl docxtpl docx2pdf pymupdf
+pip install -r requirements.txt
 ```
 
 
-## Folder structure
+## Project structure
 
 ```
 Payslip Processor/
-├── main.py                 # Entry point — launches the GUI
-├── gui.py                  # GUI window, file picker, threading, status updates
-├── excel_reader.py         # Loads the Excel file, finds matching rows
-├── employee_parser.py      # Locates employee blocks and extracts field values
-├── docx_generator.py       # Fills templates and generates DOCX payslips
-├── pdf_converter.py        # Converts DOCX → PDF and merges into a master PDF
-├── file_utils.py           # Clears output folders before each run
-├── config.py                # Defines the employee data structure
-├── Algorithm.md             # Step-by-step technical description of the pipeline
-├── README.md                 # You are here
-└── Files/
-    ├── Templates/
-    │   ├── Template_id.docx      # Used when Employee ID is present
-    │   └── Template_no_id.docx   # Used when Employee ID is blank
-    ├── Docs/                     # Generated individual DOCX payslips
-    └── PDFs/
-        ├── Individual PDFs/      # Generated individual PDF payslips
-        └── Master PDF/           # Final merged PDF for the month
+├── data/
+│   ├── input/
+│   │   └── payslip_may.xlsx        # Source payroll workbook (per-run input)
+│   └── output/                     # Generated each run — cleared automatically beforehand
+│       ├── docx/                   # Individual DOCX payslips
+│       └── pdf/
+│           ├── individual/         # Individual PDF payslips
+│           ├── master/             # Final merged PDF for the month
+│           └── protected_individuals/
+├── docs/
+│   ├── algorithm.md                # Step-by-step technical description of the pipeline
+│   └── architecture.md
+├── src/
+│   └── payslip_processor/
+│       ├── __init__.py             # Package entry point, exposes the public API
+│       ├── config.py               # Defines the employee data structure
+│       ├── directories.py          # Central place for all input/output/template paths
+│       ├── excel_reader.py         # Loads the Excel file, finds matching rows
+│       ├── employee_parser.py      # Locates employee blocks and extracts field values
+│       ├── docx_generator.py       # Fills templates and generates DOCX payslips
+│       ├── pdf_converter.py        # Converts DOCX → PDF and merges into a master PDF
+│       ├── file_utils.py           # Clears output folders before each run
+│       ├── gui.py                  # GUI window, file picker, threading, status updates
+│       └── main.py                 # Orchestrates the full pipeline
+├── templates/
+│   ├── docx/
+│   │   ├── template_id.docx        # Used when Employee ID is present
+│   │   └── template_no_id.docx     # Used when Employee ID is blank
+│   └── pdf/                        # Reference PDF versions of the templates
+├── .gitignore
+├── README.md                       # You are here
+└── requirements.txt
 ```
 
-> The `Docs`, `Individual PDFs`, and `Master PDF` folders are cleared automatically at the start of every run — don't store anything else in them.
+All paths used by the pipeline are centralized in `directories.py`, so moving folders around only requires updating that one file.
 
 
 ## How to use
@@ -76,7 +91,7 @@ Payslip Processor/
 1. **Run the app**
 
    ```bash
-   python main.py
+   python -m src.payslip_processor.main
    ```
 
    A window titled **"Payslip Processor"** opens.
@@ -97,8 +112,7 @@ Payslip Processor/
 
 The input workbook needs one block per employee, structured like this:
 
-- A cell containing the text **`EMPLOYEE INFORMATION`** marks the start of an employee's block.
-- A cell containing the text **`Net Salary Paid`** marks the end of that block.
+- A specific marker cell signals the start of an employee's block, and another marker cell signals its end.
 - Within the block, each field (e.g. `Employee Name`, `Basic Salary`, `PAN`, `Bank Name`, ...) appears as a label in one cell, with its value in the **cell immediately to the right**.
 - The full list of recognized fields is defined in `config.py`.
 
@@ -121,7 +135,7 @@ Plus one combined file:
 
 | Problem | Likely cause |
 |---|---|
-| "Failed!" popup on every run | Excel file doesn't have the expected `EMPLOYEE INFORMATION` / `Net Salary Paid` markers, or a field is misspelled |
+| "Failed!" popup on every run | Excel file doesn't match the expected block layout, or a field is misspelled |
 | PDFs look unformatted or broken | Microsoft Word isn't installed, or Word is being used by another process during conversion |
 | "Open File Location" doesn't work | The app currently uses `os.startfile`, which is Windows-only |
 | Wrong template used for an employee | Check whether their `Employee ID` cell is genuinely blank vs. containing whitespace |
@@ -129,4 +143,4 @@ Plus one combined file:
 
 ## Notes for developers
 
-See [`Algorithm.md`](./Algorithm.md) for a detailed, step-by-step breakdown of exactly how the pipeline processes the spreadsheet, generates documents, and merges PDFs.
+See [`docs/algorithm.md`](./docs/algorithm.md) for a detailed, step-by-step breakdown of exactly how the pipeline processes the spreadsheet, generates documents, and merges PDFs, and [`docs/architecture.md`](./docs/architecture.md) for how the modules fit together.
