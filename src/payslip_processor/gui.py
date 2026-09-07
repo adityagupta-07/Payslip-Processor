@@ -4,28 +4,29 @@ import threading
 import os
 import subprocess
 import sys
+from .directories import PathConfig
 
-file_path = None
+input_excel_file_path = None
 
 def browse_file(main_function, exit_button):
-    global file_path
-    file_path = filedialog.askopenfilename(
+    global input_excel_file_path
+    input_excel_file_path = filedialog.askopenfilename(
         initialdir="/",
         title="Select a File",
         filetypes=(("Excel files", "*.xlsx*"), ("all files", "*.*"))
     )
-    if not file_path:
+    if not input_excel_file_path:
         return
     status_label.config(text="Processing...")
     button.config(state="disabled")
     exit_button.config(state="disabled")
     open_location_button.pack_forget()
-    threading.Thread(target=process_file, args=(main_function, file_path, exit_button)).start()
+    threading.Thread(target=process_file, args=(main_function, input_excel_file_path, exit_button)).start()
     # root.after(1, on_processing_done)
 
-def process_file(main_function, file_path, exit_button):
+def process_file(main_function, input_excel_file_path, exit_button):
     try:
-        main_function(file_path)
+        main_function(input_excel_file_path)
         root.after(1, lambda: on_processing_done(exit_button))
     except Exception as e:
         error_message = str(e)
@@ -45,18 +46,9 @@ def on_processing_failed(error_message, exit_button):
 
 def open_file_location(pdfs_folder):
     os.startfile(pdfs_folder)
-    # if not file_path:
-    #     return
-    # folder = os.path.dirname(file_path)
 
-    # if sys.platform == "win32":
-    #     subprocess.Popen(f'explorer /select,"{file_path}"')
-    # elif sys.platform == "darwin":
-    #     subprocess.Popen(["open", "-R", file_path])
-    # else:
-    #     subprocess.Popen(["xdg-open", folder])
-
-def launch_gui(main_function, pdfs_folder):
+def launch_gui(main_function):
+    paths = PathConfig()
     global root, button, status_label, open_location_button
 
     root = tk.Tk()
@@ -75,6 +67,6 @@ def launch_gui(main_function, pdfs_folder):
     status_label = tk.Label(root, text="Please select an excel file", wraplength=450)
     status_label.pack(pady=10)
 
-    open_location_button = tk.Button(root, text="Open File Location", command=lambda: open_file_location(pdfs_folder))
+    open_location_button = tk.Button(root, text="Open File Location", command=lambda: open_file_location(paths.get_output_pdfs_folder_path))
 
     root.mainloop()

@@ -1,15 +1,15 @@
 from src.payslip_processor import (
-    Employee, fill_placeholders_in_docx, docx_creation,
-    get_employee_block, empty_nested_dict, get_details_per_employee,
-    user_input, load_excel_file, matching_row_numbers, batch_convert_docx_to_pdf1, 
-    master_pdf_creation, delete_contents, output_folder_path, delete_contents, 
-    get_template_no_id_path, get_template_id_path, get_docs_path, get_individual_pdfs_folder,
-    get_master_pdf_folder, launch_gui, get_output_pdfs_folder
+    Employee, PathConfig,  
+    fill_placeholders_in_docx, docx_creation, get_employee_block, 
+    empty_nested_dict, get_details_per_employee, user_input, 
+    load_excel_file, matching_row_numbers, batch_convert_docx_to_pdf1,
+    master_pdf_creation, delete_contents, launch_gui
 )
 
 def main(input_excel_file_path):
 
-    delete_contents(output_folder_path())
+    paths = PathConfig()
+    delete_contents(paths)
     
     if input_excel_file_path is None:
         input_excel_file_path = user_input()
@@ -21,18 +21,18 @@ def main(input_excel_file_path):
         employee_obj = Employee()
         employee_obj = get_details_per_employee(sheet, block, employee_obj)
         placeholders_in_docx_with_values = fill_placeholders_in_docx(employee_obj)
-        docx_creation(employee_obj, placeholders_in_docx_with_values, get_template_id_path, get_template_no_id_path, get_docs_path)
+        docx_creation(employee_obj, paths, placeholders_in_docx_with_values)
 
     # batch_convert_docx_to_pdf(docs_folder, destination_folder) # messes up format
-    batch_convert_docx_to_pdf1(get_docs_path(), get_individual_pdfs_folder()) # preserves format
+    batch_convert_docx_to_pdf1(paths) # preserves format
 
     master_pdf_creation(
-        get_individual_pdfs_folder(), get_master_pdf_folder(),
+        paths,
         employee_obj.get_atr("Month_year").strftime("%B"), 
         employee_obj.get_atr("Month_year").strftime("%Y")
     )
 
 if __name__ == "__main__":
     # main(None) 
-    launch_gui(main, get_output_pdfs_folder())
+    launch_gui(main)
 

@@ -6,16 +6,14 @@ from .employee_parser import get_employee_block, empty_nested_dict, get_details_
 from .docx_generator import fill_placeholders_in_docx, docx_creation
 from .pdf_converter import batch_convert_docx_to_pdf, batch_convert_docx_to_pdf1, master_pdf_creation
 from .file_utils import delete_contents
-from .directories import get_output_pdfs_folder, output_folder_path, get_template_id_path, get_template_no_id_path, get_docs_path, get_individual_pdfs_folder, get_master_pdf_folder
+from .directories import PathConfig
 from .delete_contents import delete_contents
 from .gui import launch_gui
 
 __all__ = [
-    Employee, "user_input", "load_excel_file", "matching_row_numbers",
+    "Employee", "PathConfig", "user_input", "load_excel_file", "matching_row_numbers",
     "get_employee_block", "empty_nested_dict", "get_details_per_employee",
     "fill_placeholders_in_docx", "docx_creation",
     "batch_convert_docx_to_pdf", "batch_convert_docx_to_pdf1", "master_pdf_creation",
-    "delete_contents", output_folder_path, delete_contents, get_template_no_id_path, 
-    get_template_id_path, get_docs_path, get_individual_pdfs_folder, get_master_pdf_folder,
-    launch_gui, get_output_pdfs_folder
+    "delete_contents", delete_contents, launch_gui
 ]

@@ -1,6 +1,7 @@
 import shutil
 from docxtpl import DocxTemplate
-from src.payslip_processor import Employee
+from .config import Employee
+from .directories import PathConfig
 
 def fill_placeholders_in_docx(employee_obj: Employee):
     return {
@@ -34,16 +35,17 @@ def fill_placeholders_in_docx(employee_obj: Employee):
         "MONTH_YEAR": employee_obj.get_atr("Month")
     }
 
-def docx_creation(employee: Employee, placeholders_with_values, get_template_id_path, get_template_no_id_path, get_docs_path):
+def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values):
+# def docx_creation(employee: Employee, placeholders_with_values, template_id_path, template_no_id_path, docs_folder_path):
     month_name = employee.get_atr("Month_year").strftime("%B")
     year = employee.get_atr("Month_year").strftime("%Y")
     if employee.get_atr("Employee ID") == "":
-        template_file = get_template_no_id_path() 
+        template_file = path.get_template_no_id_path
         file_name = (f"{employee.get_atr("Employee Name").strip().replace(" ", "_")}_{month_name}_{year}")
     else:
-        template_file = get_template_id_path()
+        template_file = path.get_template_id_path
         file_name = (f"{employee.get_atr("Employee Name").strip().replace(" ", "_")}_{month_name}_{year}_{str(employee.get_atr("Employee ID")).strip()}")
-    destination_file = f"{get_docs_path()}/{file_name}.docx"  
+    destination_file = f"{path.get_docs_folder_path}/{file_name}.docx"  
     shutil.copy2(template_file, destination_file)  
     doc = DocxTemplate(destination_file) 
     doc.render(placeholders_with_values)
