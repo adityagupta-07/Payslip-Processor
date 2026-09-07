@@ -36,8 +36,8 @@ def main(input_excel_file_path):
     # master_pdf_dir = "./Files/PDFs/Master PDF"
     master_pdf_creation(
         get_individual_pdfs_folder(), get_master_pdf_folder(),
-        employee_dict["specials"]["Month_year"].strftime("%B"), 
-        employee_dict["specials"]["Month_year"].strftime("%Y")
+        employee_dict["Month_year"].strftime("%B"), 
+        employee_dict["Month_year"].strftime("%Y")
     )
 
 if __name__ == "__main__":

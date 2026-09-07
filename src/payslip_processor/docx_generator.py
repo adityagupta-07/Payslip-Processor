@@ -3,7 +3,7 @@ from docxtpl import DocxTemplate
 
 def fill_placeholders_in_docx(employee):
     return {
-        "MONTH_YEAR_UPPER": f"{employee["specials"]["Month_year"].strftime("%B").upper()} {employee["specials"]["Month_year"].strftime("%Y")}",
+        "MONTH_YEAR_UPPER": f"{employee["Month_year"].strftime("%B").upper()} {employee["Month_year"].strftime("%Y")}",
         "EMPLOYEE_ID": employee["Employee ID"], 
         "EMPLOYEE_NAME": employee["Employee Name"], 
         "DESIGNATION": employee["Designation"], 
@@ -13,10 +13,10 @@ def fill_placeholders_in_docx(employee):
         "ALLOWANCES": employee["Allowances"], 
         "GROSS_SALARY": employee["Gross Salary"], 
         "GROSS_SALARY_WORKING_HOURS": employee["Gross Salary as per working hours"], 
-        "SSF_EMPLOYER": employee["SSF Contribution by Employer"], 
+        "UPPER_SSF_EMPLOYER": employee["Upper SSF Contribution by Employer"], 
         "BONUS": employee["Bonus"], 
         "TOTAL": employee["Total"], 
-        "SSF_EMPLOYER1": employee["duplicates"]["SSF Contribution by Employer"], 
+        "LOWER_SSF_EMPLOYER": employee["Lower SSF Contribution by Employer"], 
         "SSF_EMPLOYEE": employee["SSF Contribution by Employee"], 
         "TDS_FOR_MONTH": employee["TDS for the month"], 
         "TOTAL_DEDUCTION": employee["Total Deduction"], 
@@ -29,13 +29,13 @@ def fill_placeholders_in_docx(employee):
         "ANNUAL_SSF_DEPOSIT": employee["Annual SSF deposit"], 
         "ANNUAL_TDS_PAYMENT": employee["Annual TDS Payment"], 
         "ANNUAL_NET_SALARY": employee["Annual Net Salary"], 
-        "FINANCIAL_YEAR_NOTE": employee["specials"]["Financial_Year_Note"], 
+        "FINANCIAL_YEAR_NOTE": employee["Financial_Year_Note"], 
         "MONTH_YEAR": employee["Month"]
     }
 
 def docx_creation(employee, placeholders_with_values, get_template_id_path, get_template_no_id_path, get_docs_path):
-    month_name = employee["specials"]["Month_year"].strftime("%B")
-    year = employee["specials"]["Month_year"].strftime("%Y")
+    month_name = employee["Month_year"].strftime("%B")
+    year = employee["Month_year"].strftime("%Y")
     if employee["Employee ID"] == "":
         template_file = get_template_no_id_path() 
         file_name = (f"{employee["Employee Name"].strip().replace(" ", "_")}_{month_name}_{year}")

@@ -1,5 +1,6 @@
 def new_employee_dictionary():
     return {
+        "SSF Contribution by Employer": "", # Just to make its next column value evaluated
         "Employee ID": "",
         "Employee Name": "",
         "Designation": "",
@@ -9,7 +10,8 @@ def new_employee_dictionary():
         "Allowances": "",
         "Gross Salary": "",
         "Gross Salary as per working hours": "",
-        "SSF Contribution by Employer": "",
+        "Upper SSF Contribution by Employer": "",
+        "Lower SSF Contribution by Employer": "",
         "Bonus": "",
         "Total": "",
         "SSF Contribution by Employee": "", 
@@ -25,6 +27,6 @@ def new_employee_dictionary():
         "Annual TDS Payment": "",
         "Annual Net Salary": "",
         "Month": "",
-        "duplicates": {"SSF Contribution by Employer": ""},
-        "specials": {"Financial_Year_Note": "", "Month_year": ""}
+        "Financial_Year_Note": "", 
+        "Month_year": ""
 }
