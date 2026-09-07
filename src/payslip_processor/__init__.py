@@ -1,6 +1,6 @@
 """Payslip Processor package."""
 
-from .config import new_employee_dictionary
+from .config import Employee
 from .excel_reader import user_input, load_excel_file, matching_row_numbers
 from .employee_parser import get_employee_block, empty_nested_dict, get_details_per_employee
 from .docx_generator import fill_placeholders_in_docx, docx_creation
@@ -11,8 +11,7 @@ from .delete_contents import delete_contents
 from .gui import launch_gui
 
 __all__ = [
-    "new_employee_dictionary",
-    "user_input", "load_excel_file", "matching_row_numbers",
+    Employee, "user_input", "load_excel_file", "matching_row_numbers",
     "get_employee_block", "empty_nested_dict", "get_details_per_employee",
     "fill_placeholders_in_docx", "docx_creation",
     "batch_convert_docx_to_pdf", "batch_convert_docx_to_pdf1", "master_pdf_creation",
