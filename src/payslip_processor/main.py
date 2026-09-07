@@ -21,16 +21,12 @@ def main(input_excel_file_path):
     employee_blocks = get_employee_block(sheet, "EMPLOYEE INFORMATION", "Net Salary Paid", matching_row_numbers)
 
 
-    employee_details = [] # stores dictionary per employee in a list
     for block in employee_blocks: #[(1, 19), (22, 41), ......]
         employee_dict = new_employee_dictionary()
         # employee_dict = empty_nested_dict(employee_dict)
         employee_dict = get_details_per_employee(sheet, block, employee_dict)
-        employee_details.append(copy.deepcopy(employee_dict)) # Without copy.deepcopy(), it appends reference to the same underlying dictionary every time. With copy.deepcopy(), it appends a fresh original dictionary, not its reference or instance.
-
-    for employee in employee_details:
-        placeholders_in_docx_with_values = fill_placeholders_in_docx(employee)
-        docx_creation(employee, placeholders_in_docx_with_values, get_template_id_path, get_template_no_id_path, get_docs_path)
+        placeholders_in_docx_with_values = fill_placeholders_in_docx(employee_dict)
+        docx_creation(employee_dict, placeholders_in_docx_with_values, get_template_id_path, get_template_no_id_path, get_docs_path)
 
     # docs_folder = "./Files/Docs"
     # individual_pdfs_folder = "./Files/PDFs/Individual PDFs"
@@ -40,8 +36,8 @@ def main(input_excel_file_path):
     # master_pdf_dir = "./Files/PDFs/Master PDF"
     master_pdf_creation(
         get_individual_pdfs_folder(), get_master_pdf_folder(),
-        employee_details[0]["specials"]["Month_year"].strftime("%B"), 
-        employee_details[0]["specials"]["Month_year"].strftime("%Y")
+        employee_dict["specials"]["Month_year"].strftime("%B"), 
+        employee_dict["specials"]["Month_year"].strftime("%Y")
     )
 
 if __name__ == "__main__":
