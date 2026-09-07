@@ -7,6 +7,7 @@ _template_no_id_path = "templates/docx/template_no_id.docx"
 _output_docs_path = "data/output/docx"
 _individual_pdfs_folder = "data/output/pdf/individual"
 _master_pdf_dir = "data\output\pdf\master"
+_ouput_pdfs_folder = "data\output\pdf"
 
 
 def output_folder_path():
@@ -26,3 +27,6 @@ def get_individual_pdfs_folder():
 
 def get_master_pdf_folder():
     return _master_pdf_dir
+
+def get_output_pdfs_folder():
+    return _ouput_pdfs_folder
