@@ -33,6 +33,6 @@ def main(input_excel_file_path):
     )
 
 if __name__ == "__main__":
-    # main(None) 
-    launch_gui(main)
+    main(None) 
+    # launch_gui(main)
 

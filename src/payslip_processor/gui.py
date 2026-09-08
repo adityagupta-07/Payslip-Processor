@@ -6,10 +6,10 @@ import subprocess
 import sys
 from .directories import PathConfig
 
-input_excel_file_path = None
+# input_excel_file_path = None
 
 def browse_file(main_function, exit_button):
-    global input_excel_file_path
+    # global input_excel_file_path
     input_excel_file_path = filedialog.askopenfilename(
         initialdir="/",
         title="Select a File",
