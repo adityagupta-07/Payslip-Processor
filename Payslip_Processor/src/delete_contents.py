@@ -1,5 +1,5 @@
 from pathlib import Path
-from src.payslip_processor import PathConfig
+from .directories import PathConfig
 
 def delete_contents(dir: PathConfig):
     root_dir = Path(dir.get_output_folder_path)

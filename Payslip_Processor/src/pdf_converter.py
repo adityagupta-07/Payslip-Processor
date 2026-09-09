@@ -1,7 +1,5 @@
-import os
-import dxpdf
+import os, dxpdf, pymupdf
 from docx2pdf import convert
-import pymupdf
 from .directories import PathConfig
 
 def batch_convert_docx_to_pdf(paths: PathConfig):

@@ -1,10 +1,10 @@
-from src.payslip_processor import (
-    Employee, PathConfig,  
-    fill_placeholders_in_docx, docx_creation, get_employee_block, 
-    empty_nested_dict, get_details_per_employee, user_input, 
-    load_excel_file, matching_row_numbers, batch_convert_docx_to_pdf1,
-    master_pdf_creation, delete_contents, launch_gui
-)
+from .directories import PathConfig
+from .delete_contents import delete_contents
+from .excel_reader import user_input, load_excel_file, matching_row_numbers
+from .employee_parser import get_details_per_employee, get_employee_block
+from .config import Employee
+from .docx_generator import fill_placeholders_in_docx, docx_creation
+from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf, batch_convert_docx_to_pdf1
 
 def main(input_excel_file_path):
 
@@ -32,7 +32,5 @@ def main(input_excel_file_path):
         employee_obj.get_atr("Month_year").strftime("%Y")
     )
 
-if __name__ == "__main__":
-    # main(None) 
-    launch_gui(main)
+
 

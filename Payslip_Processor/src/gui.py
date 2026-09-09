@@ -1,9 +1,5 @@
-import tkinter as tk
+import threading, os, tkinter as tk
 from tkinter import filedialog, messagebox
-import threading
-import os
-import subprocess
-import sys
 from .directories import PathConfig
 
 # input_excel_file_path = None
