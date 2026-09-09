@@ -1,5 +1,7 @@
 from .config import Employee
-from .constants import *
+from .constants import ExcelConstants
+
+excel_constants = ExcelConstants()
 
 def get_employee_block(sheet, string1, string2, matching_row_numbers):
     string1_rows = matching_row_numbers(string1, sheet)
@@ -32,19 +34,19 @@ def get_details_per_employee(sheet, block, employee_obj: Employee):
 
             next_cell = sheet.cell(row=r, column=(target_cell.column+1))
 
-            if SSF_EMPLOYER in target_value:
+            if excel_constants.get_atr("SSF_EMPLOYER") in target_value:
                 if found_ssf_contribution_by_employer is True:
                     employee_obj.set_atr(
-                        SSF_EMPLOYER_LOWER, f"Rs. {next_cell.value:,.2f}"
+                        excel_constants.get_atr("SSF_EMPLOYER_LOWER"), f"Rs. {next_cell.value:,.2f}"
                     )
                     break
                 else:
                     found_ssf_contribution_by_employer = True
                     employee_obj.set_atr(
-                        SSF_EMPLOYER_UPPER, f"Rs. {next_cell.value:,.2f}"
+                        excel_constants.get_atr("SSF_EMPLOYER_UPPER"), f"Rs. {next_cell.value:,.2f}"
                     )
                     employee_obj.set_atr(
-                        FINANCIAL_YEAR_NOTE, sheet.cell(row=r, column=(target_cell.column+2)).value
+                        excel_constants.get_atr("FINANCIAL_YEAR_NOTE"), sheet.cell(row=r, column=(target_cell.column+2)).value
                     )
 
             if isinstance(next_cell.value, (int, float)) and (r > block[1]-13 and r < block[1]+1):
@@ -54,7 +56,7 @@ def get_details_per_employee(sheet, block, employee_obj: Employee):
 
             if r == (block[1]-2) and target_cell.column == 3:
                 # next_cell.value is returning <class 'datetime.datetime'> (2026-05-01 00:00:00) so we can change the format (%B = August, %Y = 2026)
-                employee_obj.set_atr(MONTH_YEAR, next_cell.value)
+                employee_obj.set_atr(excel_constants.get_atr("MONTH_YEAR"), next_cell.value)
                 employee_obj.set_atr(target_value, next_cell.value.strftime("%b %Y"))
 
     return employee_obj
