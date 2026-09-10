@@ -5,6 +5,7 @@ from .employee_parser import get_details_per_employee, get_employee_block
 from .config import Employee
 from .docx_generator import fill_placeholders_in_docx, docx_creation
 from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf, batch_convert_docx_to_pdf1
+from .password_protect_pdf import password_protect_pdfs
 
 def main(input_excel_file_path):
 
@@ -31,6 +32,10 @@ def main(input_excel_file_path):
         employee_obj.get_atr("Month_year").strftime("%B"), 
         employee_obj.get_atr("Month_year").strftime("%Y")
     )
+
+    password_protect_pdfs()
+
+
 
 
 
