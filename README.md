@@ -54,6 +54,6 @@ Everything gets stored inside `data/output`:
 * `pdf/individual/` stores the converted and unprotected PDFs per employee.
 * `pdf/protected_individuals/` stores the same PDFs but password protected with their respective PAN numbers.
 * `pdf/master/` stores a single combined PDF of all the employees.
-***only `pdf/protected_individuals/` stores password protected PDF files.***
+****O`nly `pdf/protected_individuals/` stores password protected PDF files.***
 
 The output folder is wiped clean at the start of every run so that nothing conflicts from the previous batch.
