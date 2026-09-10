@@ -1,6 +1,6 @@
 from pathlib import Path
 import pdfplumber
-
+from pypdf import PdfReader, PdfWriter
 from .directories import PathConfig
 
 path = PathConfig()
@@ -24,13 +24,32 @@ for payslip in payslip_paths:
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
             table = page.extract_table()
-
             if table:
                 for row in table:
                     for i, cell in enumerate(row):
                         if cell is not None and cell.upper() == "PAN":
-                            for cell in row[i + 1:]: # iterate over elements after "PAN" to the end in the row
+                            for cell in row[i+1: ]: # iterate over elements after "PAN" to the end in the row
                                 if cell is not None: # select the next non none value in same row after finding "PAN"
                                     password = cell
-                                    print(f"{payslip.name}, {"PAN"}: {password}")
+                                    # print(f"{payslip.name}, {"PAN"}: {password}")
                                     break
+                        if password: break
+                    if password: break
+            if password: break
+
+    if password:
+        reader = PdfReader(pdf_path)
+        writer = PdfWriter()
+        for page in reader.pages:
+            writer.add_page(page)
+        writer.encrypt(password)
+        with open(protected_pdf_path, "wb") as f:
+            writer.write(f)
+        
+
+
+
+
+
+
+                                
