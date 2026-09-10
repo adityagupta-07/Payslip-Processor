@@ -50,10 +50,10 @@ From there, click on Browse, choose your Excel file and let it process the paysl
 
 Everything gets stored inside `data/output`:
 
-- *`docx/`* stores the generated Word files per employee.
-- *`pdf/individual/`* stores the converted and unprotected PDFs per employee.
-- *`pdf/protected_individuals/`* stores the same PDFs but password protected with their respective PAN numbers.
-- *`pdf/master/`* stores a single combined PDF of all the employees.
+- *`docx/` stores the generated Word files per employee.
+- *`pdf/individual/` stores the converted and unprotected PDFs per employee.
+- *`pdf/protected_individuals/` stores the same PDFs but password protected with their respective PAN numbers.
+- *`pdf/master/` stores a single combined PDF of all the employees.
 - ***Only `pdf/protected_individuals/` stores password protected PDF files.***
 
 The output folder is wiped clean at the start of every run so that nothing conflicts from the previous batch.
