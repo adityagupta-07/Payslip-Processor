@@ -8,9 +8,9 @@ from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf, batch
 from .password_protect_pdf import password_protect_pdfs
 
 def main(input_excel_file_path):
-
+    
     paths = PathConfig()
-    delete_contents(paths)
+    delete_contents()
     
     if input_excel_file_path is None:
         input_excel_file_path = user_input()
