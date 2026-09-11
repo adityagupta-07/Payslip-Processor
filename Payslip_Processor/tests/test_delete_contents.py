@@ -1,9 +1,11 @@
-from src import delete_contents
-import unittest
+from src.delete_contents import delete_contents, check_dir
+from src.directories import PathConfig
+import pytest
+from pathlib import Path
 
-class TestDeletingContents(unittest.TestCase):
-    def check_if_deletes(self):
-        self.assertEqual(delete_contents.delete_contents(), "")
+def test_directory_is_empty():
+    delete_contents()
+    result = check_dir()
+    
+    assert result == set()
 
-if __name__ == "__main__":
-    unittest.main()

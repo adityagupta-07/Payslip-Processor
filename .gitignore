@@ -144,5 +144,4 @@ Templates/
 PDFs/
 Master Pdf/
 data/
-tests/
-test_*
+# tests/
