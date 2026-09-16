@@ -7,7 +7,7 @@ from .directories import PathConfig
 def browse_file(main_function, exit_button):
     # global input_excel_file_path
     input_excel_file_path = filedialog.askopenfilename(
-        initialdir="/",
+        initialdir="/home/aditya/Coding/Python/Payslip_Processor/data/input",
         title="Select a File",
         filetypes=(("Excel files", "*.xlsx*"), ("all files", "*.*"))
     )
@@ -63,6 +63,6 @@ def launch_gui(main_function):
     status_label = tk.Label(root, text="Please select an excel file", wraplength=450)
     status_label.pack(pady=10)
 
-    open_location_button = tk.Button(root, text="Open File Location", command=lambda: open_file_location(paths.get_output_pdfs_folder_path))
+    open_location_button = tk.Button(root, text="Open File Location", command=lambda: open_file_location(paths.get_output_folder_path))
 
     root.mainloop()
