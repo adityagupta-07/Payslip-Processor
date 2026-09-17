@@ -1,4 +1,5 @@
-import os, dxpdf, pymupdf
+# import os, dxpdf, pymupdf, subprocess
+import os, pymupdf, subprocess
 from docx2pdf import convert
 from .directories import PathConfig
 
@@ -26,6 +27,22 @@ def batch_convert_docx_to_pdf1(paths: PathConfig):
     input_dir = paths.get_docs_folder_path
     output_dir = paths.get_individual_pdfs_folder_path
     convert(input_dir, output_dir)
+    return
+
+def batch_convert_docx_to_pdf2(paths: PathConfig):
+    # LibreOffice Dependent (Preserves the format)
+    input_dir = paths.get_docs_folder_path
+    output_dir = paths.get_individual_pdfs_folder_path
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for docx_path in input_dir.iterdir():
+        if docx_path.suffix == ".docx" and not docx_path.name.startswith("~$"):
+            try:
+                subprocess.run(
+                    ["libreoffice", "--headless", "--convert-to", "pdf", "--outdir", str(output_dir), str(docx_path)],
+                    check=True, capture_output=True, text=True
+                )
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to convert {docx_path.name}. " f"Error: {e.stderr}")
     return
 
 def master_pdf_creation(paths: PathConfig, month, year): 
