@@ -3,14 +3,13 @@ import pdfplumber
 from pypdf import PdfReader, PdfWriter
 from .directories import PathConfig
 
-path = PathConfig()
 payslips = []
 payslip_paths = []
 
-individual_pdf_folder_path = Path(path.get_individual_pdfs_folder_path)
-password_protected_pdf_folder_path = Path(path.get_protected_individual_pdf_folder_path)
 
-def password_protect_pdfs():
+def password_protect_pdfs(paths: PathConfig):
+    individual_pdf_folder_path = Path(paths.individual_pdfs_folder_path)
+    password_protected_pdf_folder_path = Path(paths.protected_individual_pdf_folder_path)
     for item in individual_pdf_folder_path.iterdir():
         if item.is_file():
             payslips.append(item.name)
@@ -46,3 +45,4 @@ def password_protect_pdfs():
             writer.encrypt(password)
             with open(protected_pdf_path, "wb") as f:
                 writer.write(f)
+    return

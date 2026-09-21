@@ -43,12 +43,12 @@ def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values
     month_name = employee.get_atr(excel_constants.MONTH_YEAR).strftime("%B")
     year = employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
     if employee.get_atr(excel_constants.EMPLOYEE_ID) == "":
-        template_file = path.get_template_no_id_path
+        template_file = path.template_no_id_path
         file_name = (f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(" ", "_")}_{month_name}_{year}")
     else:
-        template_file = path.get_template_id_path
+        template_file = path.template_id_path
         file_name = (f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(" ", "_")}_{month_name}_{year}_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}")
-    destination_file = f"{path.get_docs_folder_path}/{file_name}.docx"  
+    destination_file = f"{path.output_docs_folder_path}/{file_name}.docx"  
     shutil.copy2(template_file, destination_file)  
     doc = DocxTemplate(destination_file) 
     doc.render(placeholders_with_values)
