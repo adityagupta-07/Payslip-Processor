@@ -4,7 +4,7 @@ from .excel_reader import user_input, load_excel_file, matching_row_numbers
 from .employee_parser import get_details_per_employee, get_employee_block
 from .config import Employee
 from .docx_generator import fill_placeholders_in_docx, docx_creation
-from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf, batch_convert_docx_to_pdf1, batch_convert_docx_to_pdf2
+from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf2
 from .password_protect_pdf import password_protect_pdfs
 from pathlib import Path
 
