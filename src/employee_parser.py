@@ -3,7 +3,16 @@ from .constants import ExcelConstants
 
 excel_constants = ExcelConstants()
 
-def get_employee_block(sheet, string1, string2, matching_row_numbers):
+def matching_row_numbers(search_string, sheet):
+    matching_rows = []
+    for target_row in sheet.iter_rows():
+        for cell in target_row:
+            if cell.value == search_string:
+                if cell.row not in matching_rows:
+                    matching_rows.append(cell.row)
+    return matching_rows
+
+def get_employee_block(sheet, string1, string2):
     string1_rows = matching_row_numbers(string1, sheet)
     string2_rows = matching_row_numbers(string2, sheet)
     return list(zip(string1_rows, string2_rows))

@@ -1,11 +1,13 @@
 import shutil
 from docxtpl import DocxTemplate
+from pathlib import Path
 from .config import Employee
 from .directories import PathConfig
 from .constants import ExcelConstants, DocxConstants
 
 excel_constants = ExcelConstants()
 docx_constants = DocxConstants()
+
 
 def fill_placeholders_in_docx(employee_obj: Employee):
     return {
@@ -39,18 +41,57 @@ def fill_placeholders_in_docx(employee_obj: Employee):
         docx_constants.get_atr("MONTH_YEAR"): employee_obj.get_atr(excel_constants.MONTH),
     }
 
-def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values):
-    month_name = employee.get_atr(excel_constants.MONTH_YEAR).strftime("%B")
-    year = employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
-    if employee.get_atr(excel_constants.EMPLOYEE_ID) == "":
-        template_file = path.template_no_id_path
-        file_name = (f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(" ", "_")}_{month_name}_{year}")
+
+def get_month_name(employee: Employee):
+    return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%B")
+
+
+def get_year(employee: Employee):
+    return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
+
+
+def employee_has_no_id(employee: Employee):
+    return True if (employee.get_atr(excel_constants.EMPLOYEE_ID) == "") else False
+
+
+def get_template_file_path(has_no_id: bool, path: PathConfig):
+    if has_no_id:
+        return path.template_no_id_path
     else:
-        template_file = path.template_id_path
-        file_name = (f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(" ", "_")}_{month_name}_{year}_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}")
-    destination_file = f"{path.output_docs_folder_path}/{file_name}.docx"  
+        return path.template_id_path
+
+
+def get_file_name_without_id(employee: Employee, month_name, year) -> str:
+    return f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}_{month_name}_{year}"
+
+
+def get_file_name_with_id(employee: Employee, month_name, year) -> str:
+    return f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}_{month_name}_{year}_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}"
+
+
+def get_destination_file_path(path: PathConfig, file_name: str) -> Path:
+    return path.output_docs_folder_path / f"{file_name}.docx"
+
+
+def save_docx_file(template_file, destination_file, placeholders_with_values):
     shutil.copy2(template_file, destination_file)  
     doc = DocxTemplate(destination_file) 
     doc.render(placeholders_with_values)
     doc.save(destination_file)
     return
+
+
+def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values):
+    month_name = get_month_name(employee)
+    year = get_year(employee)
+    has_no_id = employee_has_no_id(employee)
+
+    template_file = get_template_file_path(has_no_id, path)
+
+    if has_no_id:
+        file_name = get_file_name_without_id(employee, month_name, year)
+    else:
+        file_name = get_file_name_with_id(employee, month_name, year)
+
+    destination_file = get_destination_file_path(path, file_name)
+    save_docx_file(template_file, destination_file, placeholders_with_values)

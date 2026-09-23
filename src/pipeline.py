@@ -1,6 +1,6 @@
 from .directories import PathConfig
-from .delete_contents import delete_contents
-from .excel_reader import user_input, load_excel_file, matching_row_numbers
+# from .delete_contents import delete_contents
+from .excel_reader import user_input, load_excel_file
 from .employee_parser import get_details_per_employee, get_employee_block
 from .config import Employee
 from .docx_generator import fill_placeholders_in_docx, docx_creation
@@ -21,7 +21,7 @@ def main(input_excel_file_path, paths: PathConfig):
 
     sheet = load_excel_file(input_excel_file_path)
 
-    employee_blocks = get_employee_block(sheet, "EMPLOYEE INFORMATION", "Net Salary Paid", matching_row_numbers)
+    employee_blocks = get_employee_block(sheet, "EMPLOYEE INFORMATION", "Net Salary Paid")
 
     for block in employee_blocks: #[(1, 19), (22, 41), ......]
         employee_obj = Employee()
