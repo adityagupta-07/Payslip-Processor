@@ -1,36 +1,38 @@
-import os, dxpdf, pymupdf
-from docx2pdf import convert
+import os, pymupdf, subprocess
 from .directories import PathConfig
+from pathlib import Path
 
-def batch_convert_docx_to_pdf(paths: PathConfig):
-    # MS Word Independent (but messes up the format)
-    input_dir = paths.get_docs_folder_path
-    output_dir = paths.get_individual_pdfs_folder_path
-    for filename in os.listdir(input_dir):
-        if filename.endswith(".docx") and not filename.startswith("~$"):
-            docx_path = os.path.join(input_dir, filename)
-            pdf_filename = filename.rsplit(".", 1)[0] + ".pdf"
-            pdf_path = os.path.join(output_dir, pdf_filename)
-            try:
-                with open(docx_path, "rb") as f:
-                    docx_bytes = f.read()
-                pdf_bytes = dxpdf.convert(docx_bytes)
-                with open(pdf_path, "wb") as f:
-                    f.write(pdf_bytes)
-            except Exception as e:
-                print(f"Failed to convert {filename}. Error: {e}")
-    return
+def batch_convert_docx_to_pdf2(paths: PathConfig):
+    # LibreOffice Dependent (Preserves the format)
+    docx_dir = Path(paths.output_docs_folder_path)
+    output_dir = Path(paths.individual_pdfs_folder_path)
 
-def batch_convert_docx_to_pdf1(paths: PathConfig):
-    # MS Word Dependent (Preserves the format)
-    input_dir = paths.get_docs_folder_path
-    output_dir = paths.get_individual_pdfs_folder_path
-    convert(input_dir, output_dir)
+    docx_files = []
+    for p in docx_dir.iterdir():
+        if p.suffix.lower() == ".docx" and not p.name.startswith("~$"):
+            docx_files.append(str(p))
+
+    if docx_files:
+        try:
+            subprocess.run(
+                [
+                    "libreoffice", 
+                    "-env:UserInstallation=file:///tmp/lo_profile",
+                    "--headless", 
+                    "--convert-to", "pdf",
+                    "--outdir", str(output_dir)] + docx_files,
+                    check=True, capture_output=True, text=True
+            )
+            print(f"Successfully converted {len(docx_files)} files.")
+        except subprocess.CalledProcessError as e:
+            print(f"Batch conversion failed. Error: {e.stderr}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
     return
 
 def master_pdf_creation(paths: PathConfig, month, year): 
-    individual_pdfs_folder = paths.get_individual_pdfs_folder_path
-    master_pdf_folder = paths.get_master_pdf_folder_path
+    individual_pdfs_folder = paths.individual_pdfs_folder_path
+    master_pdf_folder = paths.master_pdf_folder_path
     pdf_name_list = os.listdir(individual_pdfs_folder)
     result = pymupdf.open()
     for pdf in pdf_name_list:

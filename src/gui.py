@@ -2,12 +2,10 @@ import threading, os, tkinter as tk
 from tkinter import filedialog, messagebox
 from .directories import PathConfig
 
-# input_excel_file_path = None
-
-def browse_file(main_function, exit_button):
-    # global input_excel_file_path
+def browse_file(main_function, exit_button, paths):
+    initial_dir = "/host_home" if os.path.exists("/host_home") else "/home/aditya/Coding/Python/Payslip_Processor/data/input"
     input_excel_file_path = filedialog.askopenfilename(
-        initialdir="/home/aditya/Coding/Python/Payslip_Processor/data/input",
+        initialdir=initial_dir,
         title="Select a File",
         filetypes=(("Excel files", "*.xlsx*"), ("all files", "*.*"))
     )
@@ -17,12 +15,11 @@ def browse_file(main_function, exit_button):
     button.config(state="disabled")
     exit_button.config(state="disabled")
     open_location_button.pack_forget()
-    threading.Thread(target=process_file, args=(main_function, input_excel_file_path, exit_button)).start()
-    # root.after(1, on_processing_done)
+    threading.Thread(target=process_file, args=(main_function, input_excel_file_path, exit_button, paths)).start()
 
-def process_file(main_function, input_excel_file_path, exit_button):
+def process_file(main_function, input_excel_file_path, exit_button, paths):
     try:
-        main_function(input_excel_file_path)
+        main_function(input_excel_file_path, paths)
         root.after(1, lambda: on_processing_done(exit_button))
     except Exception as e:
         error_message = str(e)
@@ -40,11 +37,12 @@ def on_processing_failed(error_message, exit_button):
     exit_button.config(state="normal")
     messagebox.showerror("Error", str(error_message))
 
-def open_file_location(pdfs_folder):
-    os.startfile(pdfs_folder)
+def show_file_location(pdfs_folder):
+    # Inside Docker, show the real host path (set via -e HOST_OUTPUT_DIR=...)
+    location = os.environ.get("HOST_OUTPUT_DIR", str(pdfs_folder))
+    messagebox.showinfo("Output Location", f"Your files are saved in:\n\n{location}")
 
-def launch_gui(main_function):
-    paths = PathConfig()
+def launch_gui(main_function, paths: PathConfig):
     global root, button, status_label, open_location_button
 
     root = tk.Tk()
@@ -54,7 +52,7 @@ def launch_gui(main_function):
     button_frame = tk.Frame(root)
     button_frame.pack(pady=20)
 
-    button = tk.Button(button_frame, text="Browse", command=lambda: browse_file(main_function, exit_button))
+    button = tk.Button(button_frame, text="Browse", command=lambda: browse_file(main_function, exit_button, paths))
     button.grid(row=0, column=0, padx=10)
 
     exit_button = tk.Button(button_frame, text="Exit", command=root.destroy)
@@ -63,6 +61,6 @@ def launch_gui(main_function):
     status_label = tk.Label(root, text="Please select an excel file", wraplength=450)
     status_label.pack(pady=10)
 
-    open_location_button = tk.Button(root, text="Open File Location", command=lambda: open_file_location(paths.get_output_folder_path))
+    open_location_button = tk.Button(root, text="Show File Location", command=lambda: show_file_location(paths.output_folder_path))
 
     root.mainloop()

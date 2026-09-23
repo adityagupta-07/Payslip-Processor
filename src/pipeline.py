@@ -4,16 +4,21 @@ from .excel_reader import user_input, load_excel_file, matching_row_numbers
 from .employee_parser import get_details_per_employee, get_employee_block
 from .config import Employee
 from .docx_generator import fill_placeholders_in_docx, docx_creation
-# from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf, batch_convert_docx_to_pdf1
-# from .password_protect_pdf import password_protect_pdfs
+from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf2
+from .password_protect_pdf import password_protect_pdfs
+from pathlib import Path
 
-def main(input_excel_file_path):
+def main(input_excel_file_path, paths: PathConfig):
 
-    paths = PathConfig()
-    delete_contents(paths)
+    # paths.create_output_folders()
+    # delete_contents(paths)
     
     if input_excel_file_path is None:
         input_excel_file_path = user_input()
+
+    # paths = PathConfig("/app/Ultra Payslips")
+    paths.create_output_dir()
+
     sheet = load_excel_file(input_excel_file_path)
 
     employee_blocks = get_employee_block(sheet, "EMPLOYEE INFORMATION", "Net Salary Paid", matching_row_numbers)
@@ -26,14 +31,15 @@ def main(input_excel_file_path):
 
     # batch_convert_docx_to_pdf(docs_folder, destination_folder) # messes up format
     # batch_convert_docx_to_pdf1(paths) # preserves format
+    batch_convert_docx_to_pdf2(paths) # LibreOffice - preserves format on linux
 
-    # master_pdf_creation(
-    #     paths,
-    #     employee_obj.get_atr("Month_year").strftime("%B"), 
-    #     employee_obj.get_atr("Month_year").strftime("%Y")
-    # )
+    master_pdf_creation(
+        paths,
+        employee_obj.get_atr("Month_year").strftime("%B"), 
+        employee_obj.get_atr("Month_year").strftime("%Y")
+    )
 
-    # password_protect_pdfs()
+    password_protect_pdfs(paths)
 
 
 
