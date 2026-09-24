@@ -42,46 +42,52 @@ def fill_placeholders_in_docx(employee_obj: Employee):
     }
 
 
-def get_month_name(employee: Employee):
+def get_month_name(employee: Employee) -> str:
     return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%B")
 
 
-def get_year(employee: Employee):
+def get_year(employee: Employee) -> str:
     return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
 
 
 def employee_has_id(employee: Employee) -> bool:
-    return True if (employee.get_atr(excel_constants.EMPLOYEE_ID) != "") else False
+    return employee.get_atr(excel_constants.EMPLOYEE_ID) != ""
 
 
-def get_template_file_path(has_id: bool, path: PathConfig):
+def get_template_file_path(has_id: bool, path: PathConfig) -> Path:
     if has_id:
         return path.template_id_path
     else:
-        return path.template_no_id_path 
+        return path.template_no_id_path
 
 
 def get_file_name(employee: Employee, month_name: str, year: str, has_id: bool) -> str:
-    file_name = f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}_{month_name}_{year}"
+    file_name = (
+        f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}"
+        f"_{month_name}_{year}"
+    )
+
     if has_id:
         file_name += f"_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}"
+
     return file_name
 
 
 def get_destination_file_path(path: PathConfig, file_name: str) -> Path:
-    return path.output_docs_folder_path / f"{file_name}.docx"
+    return path.output_docs_folder_path/f"{file_name}.docx"
 
 
-def copy_template(template_file, destination_file):
+def copy_template(template_file: Path, destination_file: Path) -> None:
     shutil.copy2(template_file, destination_file)
 
-def render_docx(destination_file, placeholders_with_values):
+
+def render_docx(destination_file: Path, placeholders_with_values: dict) -> None:
     doc = DocxTemplate(destination_file)
     doc.render(placeholders_with_values)
     doc.save(destination_file)
 
 
-def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values):
+def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values: dict) -> None:
     month_name = get_month_name(employee)
     year = get_year(employee)
     has_id = employee_has_id(employee)
