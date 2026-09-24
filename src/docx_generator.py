@@ -50,48 +50,47 @@ def get_year(employee: Employee):
     return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
 
 
-def employee_has_no_id(employee: Employee):
-    return True if (employee.get_atr(excel_constants.EMPLOYEE_ID) == "") else False
+def employee_has_id(employee: Employee) -> bool:
+    return True if (employee.get_atr(excel_constants.EMPLOYEE_ID) != "") else False
 
 
-def get_template_file_path(has_no_id: bool, path: PathConfig):
-    if has_no_id:
-        return path.template_no_id_path
-    else:
+def get_template_file_path(has_id: bool, path: PathConfig):
+    if has_id:
         return path.template_id_path
+    else:
+        return path.template_no_id_path 
 
 
-def get_file_name_without_id(employee: Employee, month_name, year) -> str:
-    return f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}_{month_name}_{year}"
-
-
-def get_file_name_with_id(employee: Employee, month_name, year) -> str:
-    return f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}_{month_name}_{year}_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}"
+def get_file_name(employee: Employee, month_name: str, year: str, has_id: bool) -> str:
+    file_name = f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}_{month_name}_{year}"
+    if has_id:
+        file_name += f"_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}"
+    return file_name
 
 
 def get_destination_file_path(path: PathConfig, file_name: str) -> Path:
     return path.output_docs_folder_path / f"{file_name}.docx"
 
 
-def save_docx_file(template_file, destination_file, placeholders_with_values):
-    shutil.copy2(template_file, destination_file)  
-    doc = DocxTemplate(destination_file) 
+def copy_template(template_file, destination_file):
+    shutil.copy2(template_file, destination_file)
+
+def render_docx(destination_file, placeholders_with_values):
+    doc = DocxTemplate(destination_file)
     doc.render(placeholders_with_values)
     doc.save(destination_file)
-    return
 
 
 def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values):
     month_name = get_month_name(employee)
     year = get_year(employee)
-    has_no_id = employee_has_no_id(employee)
+    has_id = employee_has_id(employee)
 
-    template_file = get_template_file_path(has_no_id, path)
+    template_file = get_template_file_path(has_id, path)
 
-    if has_no_id:
-        file_name = get_file_name_without_id(employee, month_name, year)
-    else:
-        file_name = get_file_name_with_id(employee, month_name, year)
+    file_name = get_file_name(employee, month_name, year, has_id)
 
     destination_file = get_destination_file_path(path, file_name)
-    save_docx_file(template_file, destination_file, placeholders_with_values)
+
+    copy_template(template_file, destination_file)
+    render_docx(destination_file, placeholders_with_values)
