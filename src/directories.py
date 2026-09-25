@@ -7,7 +7,7 @@ class PathConfig():
         base_dir = Path(__file__).resolve().parent
 
         self.output_folder_path = Path("/app/Payslip_Processor")
-        # self.output_folder_path = Path("/home/aditya/wow man")
+        # self.output_folder_path = Path("/home/aditya/Ultra Payslips 1")
         self.output_docs_folder_path = Path(f"{self.output_folder_path}/docx")
         self.output_pdfs_folder_path = Path(f"{self.output_folder_path}/pdf")
         self.individual_pdfs_folder_path = Path(f"{self.output_pdfs_folder_path}/individual_pdfs")
