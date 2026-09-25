@@ -1,12 +1,7 @@
 import pytest
 from openpyxl import Workbook
 
-from src.employee_parser import (
-    get_employee_block,
-    get_details_per_employee,
-    matching_row_numbers,
-    normalize_cell_value,
-)
+from src import get_employee_block, get_details_per_employee, matching_row_numbers, normalize_cell_value
 from src.config import Employee
 
 
