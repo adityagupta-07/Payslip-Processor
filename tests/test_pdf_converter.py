@@ -120,11 +120,11 @@ def test_append_pdf_appends_pages(tmp_path: Path):
 def test_append_pdf_raises_for_missing_pdf(tmp_path: Path):
     master_pdf = pymupdf.open()
     missing_pdf = tmp_path / "missing.pdf"
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(pymupdf.FileNotFoundError):
         append_pdf(master_pdf, missing_pdf)
 
-    assert True
     master_pdf.close()
+
 
 
 def test_save_master_pdf_creates_pdf_file(tmp_path: Path):
@@ -143,9 +143,7 @@ def test_save_master_pdf_raises_when_output_directory_does_not_exist(
     output_path = tmp_path / "missing" / "master.pdf"
     master_pdf = pymupdf.open()
     master_pdf.new_page()
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(pymupdf.mupdf.FzErrorSystem):
         save_master_pdf(master_pdf, output_path)
-
-    assert True
-
     master_pdf.close()
+
