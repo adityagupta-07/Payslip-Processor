@@ -3,6 +3,7 @@ from .directories import PathConfig
 from pathlib import Path
 
 def get_docx_files(docx_dir: Path) -> list[Path]:
+    """Return all DOCX files in the specified directory, excluding temporary files."""
     return [
         path
         for path in docx_dir.iterdir()
@@ -15,6 +16,7 @@ def build_libreoffice_command(
     docx_files: list[Path],
     output_dir: Path,
 ) -> list[str]:
+    """Build the LibreOffice command used to convert DOCX files to PDF."""
     return [
         "libreoffice",
         "-env:UserInstallation=file:///tmp/lo_profile",
@@ -31,6 +33,7 @@ def convert_docx_files(
     docx_files: list[Path],
     output_dir: Path,
 ) -> subprocess.CompletedProcess[str]:
+    """Convert the provided DOCX files to PDF using LibreOffice."""
     command = build_libreoffice_command(docx_files, output_dir)
 
     return subprocess.run(
@@ -41,9 +44,10 @@ def convert_docx_files(
     )
 
 
-def batch_convert_docx_to_pdf2(paths: PathConfig) -> None:
+def batch_convert_docx_to_pdf(paths: PathConfig) -> None:
     docx_dir = Path(paths.output_docs_folder_path)
     output_dir = Path(paths.individual_pdfs_folder_path)
+    """Batch convert DOCX files from the configured output directory to PDF files."""
 
     docx_files = get_docx_files(docx_dir)
 
@@ -60,6 +64,7 @@ def batch_convert_docx_to_pdf2(paths: PathConfig) -> None:
 
 
 def get_pdf_files(pdf_folder: Path) -> list[Path]:
+    """Return all PDF files in the specified directory."""
     return [
         pdf
         for pdf in pdf_folder.iterdir()
@@ -68,13 +73,15 @@ def get_pdf_files(pdf_folder: Path) -> list[Path]:
 
 
 def create_master_pdf() -> pymupdf.Document:
+    """Create and return a new empty PDF document."""
     return pymupdf.open()
 
 
 def append_pdf(
     master_pdf: pymupdf.Document,
     pdf_path: Path,
-) -> None:
+) -> None:  
+    """Append the pages from a PDF file to the master PDF document."""
     with pymupdf.open(pdf_path) as pdf:
         master_pdf.insert_pdf(pdf)
 
@@ -84,6 +91,7 @@ def create_master_pdf_path(
     month: str,
     year: int,
 ) -> Path:
+    """Create the output path for the master PDF using the specified month and year."""
     return master_pdf_folder / f"Payslip - {month} {year}.pdf"
 
 
@@ -91,6 +99,7 @@ def save_master_pdf(
     master_pdf: pymupdf.Document,
     output_path: Path,
 ) -> None:
+    """Save the master PDF document to the specified output path."""
     master_pdf.save(output_path)
 
 
@@ -99,6 +108,7 @@ def master_pdf_creation(
     month: str,
     year: int,
 ) -> None:
+    """Create a master PDF by combining all individual PDF files."""
     individual_pdfs_folder = Path(paths.individual_pdfs_folder_path)
     master_pdf_folder = Path(paths.master_pdf_folder_path)
 
