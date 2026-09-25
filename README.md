@@ -44,6 +44,7 @@ Run the container with the following command:
 ```
 docker run -it --rm \
   -e DISPLAY=$DISPLAY \
+  -e HOST_OUTPUT_DIR="/path/to/your/output_folder_on_host" \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v $HOME:/host_home:ro \
   -v "/path/to/your/output_folder_on_host":"/app/Payslip_Processor":rw \
