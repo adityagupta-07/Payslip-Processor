@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 from .config import Employee
-from .directories import PathConfig
+from .directories import PathConfig, output_folder_by_user
 from .excel_reader import user_input, load_excel_file
 from .password_protect_pdf import password_protect_pdfs
 from .docx_generator import fill_placeholders_in_docx, docx_creation
@@ -18,6 +18,11 @@ def get_input_file(
         return user_input()
 
     return input_excel_file_path
+
+def get_output_folder() -> str | Path:
+    """Get the output folder path from the user."""
+
+    return output_folder_by_user()
 
 
 def get_month_year(employee: Employee) -> datetime:
@@ -54,11 +59,14 @@ def create_master_pdf(paths: PathConfig, month_year: datetime) -> None:
 
 def main(
     input_excel_file_path: str | Path | None,
-    paths: PathConfig
 ) -> None:
     """Create payslip PDFs from an Excel file."""
 
     input_excel_file_path = get_input_file(input_excel_file_path)
+
+    output_folder_path = get_output_folder()
+
+    paths = PathConfig(output_folder_path)
 
     paths.create_output_dir()
 
