@@ -1,6 +1,7 @@
 import pymupdf, subprocess
 from .directories import PathConfig
 from pathlib import Path
+from docx2pdf import convert
 
 def get_docx_files(docx_dir: Path) -> list[Path]:
     """Return all DOCX files in the specified directory, excluding temporary files."""
@@ -45,9 +46,10 @@ def convert_docx_files(
 
 
 def batch_convert_docx_to_pdf(paths: PathConfig) -> None:
+    """Batch convert DOCX files from the configured output directory to PDF files."""
+
     docx_dir = Path(paths.output_docs_folder_path)
     output_dir = Path(paths.individual_pdfs_folder_path)
-    """Batch convert DOCX files from the configured output directory to PDF files."""
 
     docx_files = get_docx_files(docx_dir)
 
@@ -61,6 +63,19 @@ def batch_convert_docx_to_pdf(paths: PathConfig) -> None:
         print(f"Batch conversion failed. Error: {e.stderr}")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
+def batch_convert_docx_to_pdf_on_win(paths: PathConfig) -> None:
+    """Batch convert DOCX files from the configured output directory to PDF files on Windows."""
+
+    docx_dir = Path(paths.output_docs_folder_path)
+    output_dir = Path(paths.individual_pdfs_folder_path)
+
+    try:
+        convert(docx_dir, output_dir)
+    except Exception:
+        import traceback
+        traceback.print_exc()
 
 
 def get_pdf_files(pdf_folder: Path) -> list[Path]:
