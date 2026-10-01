@@ -71,13 +71,19 @@ def password_protect_pdfs(paths: PathConfig) -> None:
     for payslip_path in payslip_paths:
         password = extract_pan_from_pdf(payslip_path)
 
-        if not password:
+        if password is None or str(password).strip().lower() == "none":
+            print(f"No PAN number found for {payslip_path.name}. File skipped and is unprotected.")
             continue
 
-        output_path = output_folder / payslip_path.name
+        try:
 
-        protect_pdf(
-            input_path=payslip_path,
-            output_path=output_path,
-            password=password,
-        )
+            output_path = output_folder / payslip_path.name
+
+            protect_pdf(
+                payslip_path,
+                output_path,
+                password,
+            )
+
+        except Exception as e:
+            print(f"No PAN number found for {payslip_path.name}. Error: {e}")
