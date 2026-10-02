@@ -1,5 +1,6 @@
 import shutil
 from docxtpl import DocxTemplate
+from pathlib import Path
 from .config import Employee
 from .directories import PathConfig
 from .constants import ExcelConstants, DocxConstants
@@ -7,7 +8,8 @@ from .constants import ExcelConstants, DocxConstants
 excel_constants = ExcelConstants()
 docx_constants = DocxConstants()
 
-def fill_placeholders_in_docx(employee_obj: Employee):
+def fill_placeholders_in_docx(employee_obj: Employee) -> dict:
+    """Returns dictionary of docx placeholders and values to replace."""
     return {
         docx_constants.get_atr("MONTH_YEAR_UPPER"): f"{employee_obj.get_atr(excel_constants.MONTH_YEAR).strftime('%B').upper()} {employee_obj.get_atr(excel_constants.MONTH_YEAR).strftime('%Y')}",
         docx_constants.get_atr("EMPLOYEE_ID"): employee_obj.get_atr(excel_constants.EMPLOYEE_ID),
@@ -39,18 +41,93 @@ def fill_placeholders_in_docx(employee_obj: Employee):
         docx_constants.get_atr("MONTH_YEAR"): employee_obj.get_atr(excel_constants.MONTH),
     }
 
-def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values):
-    month_name = employee.get_atr(excel_constants.MONTH_YEAR).strftime("%B")
-    year = employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
-    if employee.get_atr(excel_constants.EMPLOYEE_ID) == "":
-        template_file = path.template_no_id_path
-        file_name = (f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(" ", "_")}_{month_name}_{year}")
+
+def get_month_name(employee: Employee) -> str:
+    """Get the month name from the employee's month and year."""
+
+    return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%B")
+
+
+def get_year(employee: Employee) -> str:
+    """Get the year from the employee's month and year."""
+
+    return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
+
+
+def employee_has_id(employee: Employee) -> bool:
+    """Check whether the employee has an ID."""
+
+    return employee.get_atr(excel_constants.EMPLOYEE_ID) != ""
+
+
+def get_template_file_path(has_id: bool, path: PathConfig) -> Path:
+    """Get the appropriate template file path based on employee ID."""
+
+    if has_id:
+        return path.template_id_path
     else:
-        template_file = path.template_id_path
-        file_name = (f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(" ", "_")}_{month_name}_{year}_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}")
-    destination_file = f"{path.output_docs_folder_path}/{file_name}.docx"  
-    shutil.copy2(template_file, destination_file)  
-    doc = DocxTemplate(destination_file) 
+        return path.template_no_id_path
+
+
+def get_file_name(employee: Employee, month_name: str, year: str, has_id: bool) -> str:
+    """Create the output file name for the employee."""
+
+    file_name = (
+        f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}"
+        f"_{month_name}_{year}"
+    )
+
+    if has_id:
+        file_name += f"_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}"
+
+    return file_name
+
+
+def get_destination_file_path(
+    path: PathConfig, 
+    file_name: str
+) -> Path:
+    """Create the destination file path for the output document."""
+
+    return path.output_docs_folder_path / f"{file_name}.docx"
+
+
+def copy_template(
+    template_file: Path, 
+    destination_file: Path
+) -> None:
+    """Copy the template file to the destination."""
+
+    shutil.copy2(template_file, destination_file)
+
+
+def render_docx(
+    destination_file: Path, 
+    placeholders_with_values: dict
+) -> None:
+    """Render the document with the provided placeholder values."""
+
+    doc = DocxTemplate(destination_file)
     doc.render(placeholders_with_values)
     doc.save(destination_file)
-    return
+
+
+def docx_creation(
+    employee: Employee, 
+    path: PathConfig, 
+    placeholders_with_values: dict
+) -> None:
+    """Create the final DOCX file for the employee."""
+
+    month_name = get_month_name(employee)
+    year = get_year(employee)
+    has_id = employee_has_id(employee)
+
+    template_file = get_template_file_path(has_id, path)
+
+    file_name = get_file_name(employee, month_name, year, has_id)
+
+    destination_file = get_destination_file_path(path, file_name)
+
+    copy_template(template_file, destination_file)
+    render_docx(destination_file, placeholders_with_values)
