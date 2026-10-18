@@ -1,10 +1,8 @@
 from .config import Employee
-from .constants import ExcelConstants
+from . import excel_constants
 from typing import Optional, Union
 from openpyxl.cell.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
-
-excel_constants = ExcelConstants()
 
 
 def matching_row_numbers(search_string: str, sheet: Worksheet) -> list[int]:
@@ -37,14 +35,14 @@ def set_ssf_employer_value(
 ) -> None:
     if already_found:
         employee_obj.set_atr(
-            excel_constants.get_atr("SSF_EMPLOYER_LOWER"), f"Rs. {next_cell.value:,.2f}"
+            excel_constants.SSF_EMPLOYER_LOWER, f"Rs. {next_cell.value:,.2f}"
         )
     else:
         employee_obj.set_atr(
-            excel_constants.get_atr("SSF_EMPLOYER_UPPER"), f"Rs. {next_cell.value:,.2f}"
+            excel_constants.SSF_EMPLOYER_UPPER, f"Rs. {next_cell.value:,.2f}"
         )
         employee_obj.set_atr(
-            excel_constants.get_atr("FINANCIAL_YEAR_NOTE"),
+            excel_constants.FINANCIAL_YEAR_NOTE,
             sheet.cell(row=r, column=(target_cell.column + 2)).value,
         )
 
@@ -71,7 +69,7 @@ def set_month_year(
     block: tuple[int, int],
 ) -> None:
     if r == (block[1] - 2) and target_cell.column == 3:
-        employee_obj.set_atr(excel_constants.get_atr("MONTH_YEAR"), next_cell.value)
+        employee_obj.set_atr(excel_constants.MONTH_YEAR, next_cell.value)
         employee_obj.set_atr(target_value, next_cell.value.strftime("%b %Y"))
 
 
@@ -91,7 +89,7 @@ def get_details_per_employee(
 
             next_cell = sheet.cell(row=r, column=(target_cell.column + 1))
 
-            if excel_constants.get_atr("SSF_EMPLOYER") in target_value:
+            if excel_constants.SSF_EMPLOYER in target_value:
                 set_ssf_employer_value(
                     employee_obj, sheet, r, target_cell, next_cell, found_ssf_contribution_by_employer
                 )
