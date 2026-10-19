@@ -1,56 +1,131 @@
 import shutil
 from docxtpl import DocxTemplate
+from pathlib import Path
 from .config import Employee
 from .directories import PathConfig
-from .constants import ExcelConstants, DocxConstants
+from . import excel_constants, docx_constants
 
-excel_constants = ExcelConstants()
-docx_constants = DocxConstants()
 
-def fill_placeholders_in_docx(employee_obj: Employee):
+def fill_placeholders_in_docx(employee_obj: Employee) -> dict:
+    """Returns dictionary of docx placeholders and values to replace."""
     return {
-        docx_constants.get_atr("MONTH_YEAR_UPPER"): f"{employee_obj.get_atr(excel_constants.MONTH_YEAR).strftime('%B').upper()} {employee_obj.get_atr(excel_constants.MONTH_YEAR).strftime('%Y')}",
-        docx_constants.get_atr("EMPLOYEE_ID"): employee_obj.get_atr(excel_constants.EMPLOYEE_ID),
-        docx_constants.get_atr("EMPLOYEE_NAME"): employee_obj.get_atr(excel_constants.EMPLOYEE_NAME),
-        docx_constants.get_atr("DESIGNATION"): employee_obj.get_atr(excel_constants.DESIGNATION),
-        docx_constants.get_atr("PAN"): employee_obj.get_atr(excel_constants.PAN),
-        docx_constants.get_atr("CONTACT_NUMBER"): employee_obj.get_atr(excel_constants.CONTACT_NUMBER),
-        docx_constants.get_atr("BASIC_SALARY"): employee_obj.get_atr(excel_constants.BASIC_SALARY),
-        docx_constants.get_atr("ALLOWANCES"): employee_obj.get_atr(excel_constants.ALLOWANCES),
-        docx_constants.get_atr("GROSS_SALARY"): employee_obj.get_atr(excel_constants.GROSS_SALARY),
-        docx_constants.get_atr("GROSS_SALARY_WORKING_HOURS"): employee_obj.get_atr(excel_constants.GROSS_SALARY_AS_PER_WORKING_HOURS),
-        docx_constants.get_atr("UPPER_SSF_EMPLOYER"): employee_obj.get_atr(excel_constants.SSF_EMPLOYER_UPPER),
-        docx_constants.get_atr("BONUS"): employee_obj.get_atr(excel_constants.BONUS),
-        docx_constants.get_atr("TOTAL"): employee_obj.get_atr(excel_constants.TOTAL),
-        docx_constants.get_atr("LOWER_SSF_EMPLOYER"): employee_obj.get_atr(excel_constants.SSF_EMPLOYER_LOWER),
-        docx_constants.get_atr("SSF_EMPLOYEE"): employee_obj.get_atr(excel_constants.SSF_EMPLOYEE),
-        docx_constants.get_atr("TDS_FOR_MONTH"): employee_obj.get_atr(excel_constants.TDS_FOR_THE_MONTH),
-        docx_constants.get_atr("TOTAL_DEDUCTION"): employee_obj.get_atr(excel_constants.TOTAL_DEDUCTION),
-        docx_constants.get_atr("NET_SALARY_PAID"): employee_obj.get_atr(excel_constants.NET_SALARY_PAID),
-        docx_constants.get_atr("ACCOUNT_NUMBER"): employee_obj.get_atr(excel_constants.ACCOUNT_NUMBER),
-        docx_constants.get_atr("BANK_NAME"): employee_obj.get_atr(excel_constants.BANK_NAME),
-        docx_constants.get_atr("BRANCH"): employee_obj.get_atr(excel_constants.BRANCH),
-        docx_constants.get_atr("MARITAL_STATUS"): employee_obj.get_atr(excel_constants.MARITAL_STATUS),
-        docx_constants.get_atr("ANNUAL_TAXABLE_SALARY"): employee_obj.get_atr(excel_constants.ANNUAL_TAXABLE_SALARY),
-        docx_constants.get_atr("ANNUAL_SSF_DEPOSIT"): employee_obj.get_atr(excel_constants.ANNUAL_SSF_DEPOSIT),
-        docx_constants.get_atr("ANNUAL_TDS_PAYMENT"): employee_obj.get_atr(excel_constants.ANNUAL_TDS_PAYMENT),
-        docx_constants.get_atr("ANNUAL_NET_SALARY"): employee_obj.get_atr(excel_constants.ANNUAL_NET_SALARY),
-        docx_constants.get_atr("FINANCIAL_YEAR_NOTE"): employee_obj.get_atr(excel_constants.FINANCIAL_YEAR_NOTE),
-        docx_constants.get_atr("MONTH_YEAR"): employee_obj.get_atr(excel_constants.MONTH),
+        docx_constants.MONTH_YEAR_UPPER: f"{employee_obj.get_atr(excel_constants.MONTH_YEAR).strftime('%B').upper()} {employee_obj.get_atr(excel_constants.MONTH_YEAR).strftime('%Y')}",
+        docx_constants.EMPLOYEE_ID: employee_obj.get_atr(excel_constants.EMPLOYEE_ID),
+        docx_constants.EMPLOYEE_NAME: employee_obj.get_atr(excel_constants.EMPLOYEE_NAME),
+        docx_constants.DESIGNATION: employee_obj.get_atr(excel_constants.DESIGNATION),
+        docx_constants.PAN: employee_obj.get_atr(excel_constants.PAN),
+        docx_constants.CONTACT_NUMBER: employee_obj.get_atr(excel_constants.CONTACT_NUMBER),
+        docx_constants.BASIC_SALARY: employee_obj.get_atr(excel_constants.BASIC_SALARY),
+        docx_constants.ALLOWANCES: employee_obj.get_atr(excel_constants.ALLOWANCES),
+        docx_constants.GROSS_SALARY: employee_obj.get_atr(excel_constants.GROSS_SALARY),
+        docx_constants.GROSS_SALARY_WORKING_HOURS: employee_obj.get_atr(excel_constants.GROSS_SALARY_AS_PER_WORKING_HOURS),
+        docx_constants.UPPER_SSF_EMPLOYER: employee_obj.get_atr(excel_constants.SSF_EMPLOYER_UPPER),
+        docx_constants.BONUS: employee_obj.get_atr(excel_constants.BONUS),
+        docx_constants.TOTAL: employee_obj.get_atr(excel_constants.TOTAL),
+        docx_constants.LOWER_SSF_EMPLOYER: employee_obj.get_atr(excel_constants.SSF_EMPLOYER_LOWER),
+        docx_constants.SSF_EMPLOYEE: employee_obj.get_atr(excel_constants.SSF_EMPLOYEE),
+        docx_constants.TDS_FOR_MONTH: employee_obj.get_atr(excel_constants.TDS_FOR_THE_MONTH),
+        docx_constants.TOTAL_DEDUCTION: employee_obj.get_atr(excel_constants.TOTAL_DEDUCTION),
+        docx_constants.NET_SALARY_PAID: employee_obj.get_atr(excel_constants.NET_SALARY_PAID),
+        docx_constants.ACCOUNT_NUMBER: employee_obj.get_atr(excel_constants.ACCOUNT_NUMBER),
+        docx_constants.BANK_NAME: employee_obj.get_atr(excel_constants.BANK_NAME),
+        docx_constants.BRANCH: employee_obj.get_atr(excel_constants.BRANCH),
+        docx_constants.MARITAL_STATUS: employee_obj.get_atr(excel_constants.MARITAL_STATUS),
+        docx_constants.ANNUAL_TAXABLE_SALARY: employee_obj.get_atr(excel_constants.ANNUAL_TAXABLE_SALARY),
+        docx_constants.ANNUAL_SSF_DEPOSIT: employee_obj.get_atr(excel_constants.ANNUAL_SSF_DEPOSIT),
+        docx_constants.ANNUAL_TDS_PAYMENT: employee_obj.get_atr(excel_constants.ANNUAL_TDS_PAYMENT),
+        docx_constants.ANNUAL_NET_SALARY: employee_obj.get_atr(excel_constants.ANNUAL_NET_SALARY),
+        docx_constants.FINANCIAL_YEAR_NOTE: employee_obj.get_atr(excel_constants.FINANCIAL_YEAR_NOTE),
+        docx_constants.MONTH_YEAR: employee_obj.get_atr(excel_constants.MONTH),
     }
 
-def docx_creation(employee: Employee, path: PathConfig, placeholders_with_values):
-    month_name = employee.get_atr(excel_constants.MONTH_YEAR).strftime("%B")
-    year = employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
-    if employee.get_atr(excel_constants.EMPLOYEE_ID) == "":
-        template_file = path.template_no_id_path
-        file_name = (f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(" ", "_")}_{month_name}_{year}")
+
+def get_month_name(employee: Employee) -> str:
+    """Get the month name from the employee's month and year."""
+
+    return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%B")
+
+
+def get_year(employee: Employee) -> str:
+    """Get the year from the employee's month and year."""
+
+    return employee.get_atr(excel_constants.MONTH_YEAR).strftime("%Y")
+
+
+def employee_has_id(employee: Employee) -> bool:
+    """Check whether the employee has an ID."""
+
+    return employee.get_atr(excel_constants.EMPLOYEE_ID) != ""
+
+
+def get_template_file_path(has_id: bool, path: PathConfig) -> Path:
+    """Get the appropriate template file path based on employee ID."""
+
+    if has_id:
+        return path.template_id_path
     else:
-        template_file = path.template_id_path
-        file_name = (f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(" ", "_")}_{month_name}_{year}_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}")
-    destination_file = f"{path.output_docs_folder_path}/{file_name}.docx"  
-    shutil.copy2(template_file, destination_file)  
-    doc = DocxTemplate(destination_file) 
+        return path.template_no_id_path
+
+
+def get_file_name(employee: Employee, month_name: str, year: str, has_id: bool) -> str:
+    """Create the output file name for the employee."""
+
+    file_name = (
+        f"{employee.get_atr(excel_constants.EMPLOYEE_NAME).strip().replace(' ', '_')}"
+        f"_{month_name}_{year}"
+    )
+
+    if has_id:
+        file_name += f"_{str(employee.get_atr(excel_constants.EMPLOYEE_ID)).strip()}"
+
+    return file_name
+
+
+def get_destination_file_path(
+    path: PathConfig, 
+    file_name: str
+) -> Path:
+    """Create the destination file path for the output document."""
+
+    return path.output_docs_folder_path / f"{file_name}.docx"
+
+
+def copy_template(
+    template_file: Path, 
+    destination_file: Path
+) -> None:
+    """Copy the template file to the destination."""
+
+    shutil.copy2(template_file, destination_file)
+
+
+def render_docx(
+    destination_file: Path, 
+    placeholders_with_values: dict
+) -> None:
+    """Render the document with the provided placeholder values."""
+
+    doc = DocxTemplate(destination_file)
     doc.render(placeholders_with_values)
     doc.save(destination_file)
-    return
+
+
+def docx_creation(
+    employee: Employee, 
+    path: PathConfig, 
+    placeholders_with_values: dict
+) -> None:
+    """Create the final DOCX file for the employee."""
+
+    month_name = get_month_name(employee)
+    year = get_year(employee)
+    has_id = employee_has_id(employee)
+
+    template_file = get_template_file_path(has_id, path)
+
+    file_name = get_file_name(employee, month_name, year, has_id)
+
+    destination_file = get_destination_file_path(path, file_name)
+
+    copy_template(template_file, destination_file)
+    render_docx(destination_file, placeholders_with_values)

@@ -1,15 +1,14 @@
 # Payslip Processor
 
-This program is a tool that generates a separate password protected PDF payslip for each employee, as well as a master PDF containing the individual payslips of all employees, using an Excel payslip file containing the employees’ data as input.
+This program is a tool that generates a separate password protected PDF payslip for each employee, a master PDF containing the individual payslips of all employees and password protected PDFs in a separate folder which can be accessed by their own PAN number.
 
 ## Project structure
 
 ```
-├── docs
-│   └── algorithm.md
 ├── Payslip_Processor
 │   ├── src
 │   │   ├── __init__.py
+│   │   ├── __main__.py
 │   │   ├── config.py
 │   │   ├── constants.py
 │   │   ├── delete_contents.py
@@ -21,39 +20,46 @@ This program is a tool that generates a separate password protected PDF payslip 
 │   │   ├── password_protect_pdf.py
 │   │   ├── pdf_converter.py
 │   │   └── pipeline.py
-│   └── __main__.py
+│   ├── templates
+│   │   └── docx
+│   │       ├── template_id.docx
+│   │       └── template_no_id.docx
+│   └── Dockerfile
 ├── README.md
 └── requirements.txt
 ```
 
 ## Installation
 
-Clone the repo, then install the dependencies:
+Pull the image:
 
 ```
-pip install -r requirements.txt
+docker pull aadityagupta077/payslip-processor:latest
 ```
-
-Make sure the two Word templates (with ID and without ID) are stored in `templates/docx/` in root directory.
 
 ## Usage
 
-Run the module and the GUI will open:
+Run the container with the following command: 
 
 ```
-python -m Payslip_Processor
+docker run -it --rm \
+  -e DISPLAY=$DISPLAY \
+  -e HOST_OUTPUT_DIR="/path/to/your/output_folder_on_host" \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v $HOME:/host_home:ro \
+  -v "/path/to/your/output_folder_on_host":"/app/Payslip_Processor":rw \
+  aadityagupta077/payslip-processor:latest
 ```
 
-From there, click on Browse, choose your Excel file and let it process the payslips. After it finishes, it shows a button to open the output folder directly.
+Just replace `/path/to/your/output_folder_on_host` with the local folder on your machine where you want the container to write output files & folders.
+
+Once the GUI opens, click **Browse**, choose your Excel file and let it process the payslips. When it finishes, click **Show File Location** to see where the output has been saved.
 
 ## Output
 
-Everything gets stored inside `data/output`:
+Everything gets stored inside `/path/to/your/output_folder_on_host` (i.e. the mounted local folder of host):
 
 - *`docx/` stores the generated Word files per employee.*
-- *`pdf/individual/` stores the converted and unprotected PDFs per employee.*
-- *`pdf/protected_individuals/` stores the same PDFs but password protected with their respective PAN numbers.*
-- *`pdf/master/` stores a single combined PDF of all the employees.*
-- ***Only `pdf/protected_individuals/` stores password protected PDF files.***
-
-The output folder is wiped clean at the start of every run so that nothing conflicts from the previous batch.
+- *`pdf/individual_pdfs/` stores the converted and unprotected PDFs per employee.*
+- *`pdf/protected_individual_pdfs/` stores the same PDFs but password protected with their respective PAN numbers.*
+- *`pdf/master_pdf/` stores a single combined PDF of all the employees.*
