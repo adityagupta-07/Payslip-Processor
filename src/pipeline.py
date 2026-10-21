@@ -3,16 +3,17 @@ from pathlib import Path
 import platform
 import sys
 from .config import Employee
-from .directories import PathConfig, output_folder_by_user
+from .directories import PathConfig, output_folder_by_user, local_sharepoint_folder_by_user
 from .excel_reader import user_input, load_excel_file
 from .password_protect_pdf import password_protect_pdfs
 from .docx_generator import fill_placeholders_in_docx, docx_creation
 from .employee_parser import get_details_per_employee, get_employee_block
 from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf, batch_convert_docx_to_pdf_on_win
+from .write_files_locally_and_sync_with_sharepoint import write_files_locally_in_sharepoint_folder
 
 
 def get_input_file(
-    input_excel_file_path: str | Path | None
+    input_excel_file_path: Path | None
 ) -> str | Path:
     """Get the Excel file path from the user if it was not provided."""
 
@@ -21,10 +22,15 @@ def get_input_file(
 
     return input_excel_file_path
 
-def get_output_folder() -> str | Path:
+def get_output_folder() -> Path:
     """Get the output folder path from the user."""
 
     return output_folder_by_user()
+
+def get_local_sharepoint_folder() -> Path:
+    """Get the sharepoint local folder path from the user."""
+
+    return local_sharepoint_folder_by_user()
 
 
 def get_month_year(employee: Employee) -> datetime:
@@ -73,6 +79,8 @@ def main(
 
     output_folder_path = get_output_folder()
 
+    local_sharepoint_folder_path = get_local_sharepoint_folder()
+
     paths = PathConfig(output_folder_path)
 
     paths.create_output_dir()
@@ -98,3 +106,5 @@ def main(
     create_master_pdf(paths, month_year)
 
     password_protect_pdfs(paths)
+
+    write_files_locally_in_sharepoint_folder(paths, local_sharepoint_folder_path)

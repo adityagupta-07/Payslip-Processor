@@ -4,7 +4,7 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 
-def validate_file_path(path: str) -> str:
+def validate_file_path(path: str) -> Path:
     """Validate and return a valid Excel file path."""
 
     path = path.strip().replace('"', "")
@@ -22,10 +22,10 @@ def validate_file_path(path: str) -> str:
 
     if file_path.suffix.lower() not in [".xlsx", ".xlsm"]:
         raise ValueError("Please provide an .xlsx or .xlsm Excel file.")    
-    return str(file_path)
+    return file_path
 
 
-def user_input() -> str:
+def user_input() -> Path:
     """Prompt the user until they provide a valid Excel file path."""
 
     while True:
