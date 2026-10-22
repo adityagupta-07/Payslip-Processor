@@ -9,7 +9,7 @@ from .password_protect_pdf import password_protect_pdfs
 from .docx_generator import fill_placeholders_in_docx, docx_creation
 from .employee_parser import get_details_per_employee, get_employee_block
 from .pdf_converter import master_pdf_creation, batch_convert_docx_to_pdf, batch_convert_docx_to_pdf_on_win
-from .write_files_locally_and_sync_with_sharepoint import write_files_locally_in_sharepoint_folder
+from .write_files_into_local_sharepoint_folder import write_files_locally_in_sharepoint_folder
 
 
 def get_input_file(
@@ -22,10 +22,12 @@ def get_input_file(
 
     return input_excel_file_path
 
+
 def get_output_folder() -> Path:
     """Get the output folder path from the user."""
 
     return output_folder_by_user()
+
 
 def get_local_sharepoint_folder() -> Path:
     """Get the sharepoint local folder path from the user."""
