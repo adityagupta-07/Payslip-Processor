@@ -1,15 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Payslip Processor</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <title>Payslip Processor</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h1>Payslip Processor</h1>
 
-    <h1>Payslip Processor</h1>
+  <button id="excel-button"></button>
+  <button id="output-button"></button>
+  <button id="sharepoint-button"></button>
+  <input id="year-input" placeholder="Year folder name, e.g. '2083-84'">
+  <button id="process-button" disabled>Process</button>
+  <p id="status"></p>
+  <ul id="messages"></ul>
 
-    <p>Web application running!!!</p>
-
+  <script type="module" src="main.js"></script>
 </body>
 </html>
