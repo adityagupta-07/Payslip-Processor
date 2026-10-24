@@ -131,7 +131,10 @@ def get_emp_id_from_emp_dir(dir: Path) -> int:
     return int(emp_dir.split("_", 1)[1].split()[0])
 
 
-def write_files_locally_in_sharepoint_folder(paths: PathConfig, local_sharepoint_folder_path: Path):
+def write_files_locally_in_sharepoint_folder(paths: PathConfig, local_sharepoint_folder_path: Path) -> list[str]:
+    """Copy each protected PDF into its employee's folder. Returns warning messages."""
+    messages = []
+
     password_protected_pdfs = dict_of_password_protected_pdfs(paths)
     local_employee_folders = list_of_local_employee_folders_from_sharepoint(local_sharepoint_folder_path)
 
@@ -148,7 +151,7 @@ def write_files_locally_in_sharepoint_folder(paths: PathConfig, local_sharepoint
         ]
 
         if not matching_folders:
-            print(f"No destination folder found for {emp_name_from_pdf}")
+            messages.append(f"No destination folder found for {emp_name_from_pdf}")
             continue
 
         # If multiple folders have the same name, match by employee ID
@@ -160,7 +163,7 @@ def write_files_locally_in_sharepoint_folder(paths: PathConfig, local_sharepoint
             ]
 
         if len(matching_folders) != 1:
-            print(f"Could not get unique destination folder for {emp_name_from_pdf} (ID: {emp_id_from_pdf})")
+            messages.append(f"Could not get unique destination folder for {emp_name_from_pdf} (ID: {emp_id_from_pdf})")
             continue
 
         destination_folder = matching_folders[0]
@@ -168,4 +171,6 @@ def write_files_locally_in_sharepoint_folder(paths: PathConfig, local_sharepoint
         try:
             shutil.copy(protected_pdf_path, destination_folder / f"{month_from_pdf}.pdf")
         except OSError as e:
-            print(f"Failed to copy PDF for {emp_name_from_pdf}: {e}")
+            messages.append(f"Failed to copy PDF for {emp_name_from_pdf}: {e}")
+
+    return messages

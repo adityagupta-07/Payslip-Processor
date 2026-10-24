@@ -53,10 +53,21 @@ def create_employee_doc_per_emp(sheet, block, paths: PathConfig) -> Employee:
     return filled_employee_obj
 
 
+def convert_on_windows(paths: PathConfig) -> None:
+    """Convert with Word. COM must be started in every thread that uses it."""
+    import pythoncom
+
+    pythoncom.CoInitialize()
+    try:
+        batch_convert_docx_to_pdf_on_win(paths)
+    finally:
+        pythoncom.CoUninitialize()
+
+
 def convert_docx_files_to_pdf(paths: PathConfig) -> None:
     """Convert every employee's DOCX file into its own PDF."""
     if platform.system() == "Windows":
-        batch_convert_docx_to_pdf_on_win(paths)
+        convert_on_windows(paths)
     else:
         batch_convert_docx_to_pdf(paths)
 
@@ -70,18 +81,16 @@ def create_master_pdf(paths: PathConfig, month_year: datetime) -> None:
     )
 
 
-def main(
-    input_excel_file_path: str | Path | None,
-) -> None:
+def main(input_excel_file_path: Path, output_folder_path: Path, local_sharepoint_folder_path: Path) -> None:
     """Create payslip PDFs from an Excel file."""
 
     sys.path.append("..")
 
-    input_excel_file_path = get_input_file(input_excel_file_path)
+    # input_excel_file_path = get_input_file(input_excel_file_path)
 
-    output_folder_path = get_output_folder()
+    # output_folder_path = get_output_folder()
 
-    local_sharepoint_folder_path = get_local_sharepoint_folder()
+    # local_sharepoint_folder_path = get_local_sharepoint_folder()
 
     paths = PathConfig(output_folder_path)
 
@@ -109,4 +118,4 @@ def main(
 
     password_protect_pdfs(paths)
 
-    write_files_locally_in_sharepoint_folder(paths, local_sharepoint_folder_path)
+    return write_files_locally_in_sharepoint_folder(paths, local_sharepoint_folder_path)
