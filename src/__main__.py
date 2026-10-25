@@ -1,8 +1,4 @@
-from .pipeline import main
-from .gui import launch_gui
-from .directories import PathConfig
+from .server import app
 
 if __name__ == "__main__":
-    # paths = PathConfig()
-    main(None)        # CLI
-    # launch_gui(main, paths)    # GUI
+    app.run(host="0.0.0.0", port=8000)
