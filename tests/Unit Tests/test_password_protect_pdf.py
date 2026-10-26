@@ -23,7 +23,7 @@ def test_get_payslip_paths(tmp_path):
     txt_file.touch()
     result = get_payslip_paths(tmp_path)
 
-    assert result == [pdf_file, txt_file]
+    assert sorted(result) == sorted([pdf_file, txt_file])
 
 
 def test_get_payslip_paths_empty_folder(tmp_path):
