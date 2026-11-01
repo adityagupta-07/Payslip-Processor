@@ -77,6 +77,20 @@ def get_month_from_protected_pdf(name: str) -> str:
     return month
 
 
+def get_year_from_protected_pdf(name: str) -> str:
+    """Returns year from pdf name.
+    '2026' from 'Rohit Sharma May 2026 11'
+    """
+
+    words = name.split()
+
+    for word in words:
+        if word.isdigit() and len(word) == 4:
+            year = word
+
+    return year
+
+
 def list_of_local_employee_folders_from_sharepoint(local_sharepoint_folder_path: Path) -> list[Path]:
     """Return employee folder paths mapped to employee names."""
 
@@ -142,6 +156,7 @@ def write_files_locally_in_sharepoint_folder(paths: PathConfig, local_sharepoint
         emp_name_from_pdf = get_employee_name_from_protected_pdf(pdf_name)
         emp_id_from_pdf = get_employee_id_from_protected_pdf(pdf_name)
         month_from_pdf = get_month_from_protected_pdf(pdf_name)
+        year_from_pdf = get_year_from_protected_pdf(pdf_name)
 
         # Find folders matching the employee name
         matching_folders = [
@@ -169,7 +184,7 @@ def write_files_locally_in_sharepoint_folder(paths: PathConfig, local_sharepoint
         destination_folder = matching_folders[0]
 
         try:
-            shutil.copy(protected_pdf_path, destination_folder / f"{month_from_pdf}.pdf")
+            shutil.copy(protected_pdf_path, destination_folder / f"{month_from_pdf} {year_from_pdf}.pdf")
         except OSError as e:
             messages.append(f"Failed to copy PDF for {emp_name_from_pdf}: {e}")
 
