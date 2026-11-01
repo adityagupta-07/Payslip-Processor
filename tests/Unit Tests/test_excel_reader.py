@@ -1,6 +1,7 @@
 import pytest
 import openpyxl
 from openpyxl import Workbook
+from pathlib import Path
 
 from src import validate_file_path, load_workbook, get_active_sheet, load_excel_file
 
@@ -10,7 +11,7 @@ def test_validate_file_path_xlsx(tmp_path):
     file_path.touch()
     result = validate_file_path(str(file_path))
 
-    assert result == str(file_path)
+    assert result == Path(file_path)
 
 
 def test_validate_file_path_xlsm(tmp_path):
@@ -18,7 +19,7 @@ def test_validate_file_path_xlsm(tmp_path):
     file_path.touch()
     result = validate_file_path(str(file_path))
 
-    assert result == str(file_path)
+    assert result == Path(file_path)
 
 
 def test_validate_file_path_strips_whitespace_and_quotes(tmp_path):
@@ -26,7 +27,7 @@ def test_validate_file_path_strips_whitespace_and_quotes(tmp_path):
     file_path.touch()
     result = validate_file_path(f'  "{file_path}"  ')
 
-    assert result == str(file_path)
+    assert result == Path(file_path)
 
 
 def test_validate_file_path_empty():

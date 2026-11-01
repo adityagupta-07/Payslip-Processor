@@ -4,9 +4,7 @@ import pytest
 from src import get_month_name, get_year, employee_has_id, employee_has_id, get_file_name, get_template_file_path, get_destination_file_path
 from src.config import Employee
 from src.directories import PathConfig
-from src.constants import ExcelConstants
-
-excel_constants = ExcelConstants()
+import src.excel_constants as excel_constants
 
 
 @pytest.fixture
@@ -29,7 +27,7 @@ def employee_without_id():
 
 @pytest.fixture
 def path_config(tmp_path):
-    config = PathConfig()
+    config = PathConfig(tmp_path)
     # Point everything to a temporary test folder instead of the real /app path
     config.output_docs_folder_path = tmp_path
     config.template_id_path = tmp_path / "template_id.docx"

@@ -1,9 +1,9 @@
-from docx import Document
+import pytest
 from pypdf import PdfReader
 from helpers import get_pan_from_docx
 
 
-def test_protected_pdfs_unlock_with_pan(run):
+def test_protected_pdfs_unlock_with_pan(run) -> None:
     """This tests opens docx and access PAN number as password and again opens password
     protected PDF with same name as docx and tries to unlock with the accessed PAN 
     number."""
@@ -22,13 +22,13 @@ def test_protected_pdfs_unlock_with_pan(run):
 
         pdf_file = run.protected_dir / f"{docx_file.stem}.pdf"
         if not pdf_file.is_file():
-            problems.append(f"{pdf_file.name}: protected PDF missing")
+            problems.append(f"{docx_file.name}: protected PDF missing")
             continue
 
         reader = PdfReader(pdf_file)
         if not reader.is_encrypted:
-            problems.append(f"{pdf_file.name}: PDF is not password protected")
+            problems.append(f"{docx_file.name}: PDF is not password protected")
         elif reader.decrypt(pan) == 0:
-            problems.append(f"{pdf_file.name}: could not unlock with PAN '{pan}'")
+            problems.append(f"{docx_file.name}: could not unlock with PAN '{pan}'")
 
     assert problems == [], "\n".join(problems)

@@ -1,11 +1,11 @@
-import openpyxl
+import base64
 from pathlib import Path
+import openpyxl
 from docx import Document
 
 
-def matching_rows(sheet, text):
+def matching_rows(sheet, text: str) -> list[int]:
     """Row numbers of the cells that equal 'text' exactly."""
-
     rows = []
     for row in sheet.iter_rows():
         for cell in row:
@@ -14,7 +14,7 @@ def matching_rows(sheet, text):
     return rows
 
 
-def get_pan_from_docx(docx_path):
+def get_pan_from_docx(docx_path: Path) -> str | None:
     """Return the next non-empty value after the word 'PAN' in the docx."""
     doc = Document(docx_path)
 
@@ -34,10 +34,19 @@ def get_pan_from_docx(docx_path):
     return None
 
 
-def count_employees_in_excel(excel_file):
+def count_employees_in_excel(excel_file: Path) -> int:
+    """One 'Net Salary Paid' row per employee."""
     sheet = openpyxl.load_workbook(excel_file, data_only=True).active
     return len(matching_rows(sheet, "Net Salary Paid"))
 
 
-def pdfs_in(folder):
+def pdfs_in(folder: Path) -> list[Path]:
     return sorted(Path(folder).glob("*.pdf"))
+
+
+def write_result_files(folder: Path, files: list[dict]) -> None:
+    """Save the files returned by generate_payslips (path + base64 data) into a folder."""
+    for file in files:
+        target = folder / file["path"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(base64.b64decode(file["data"]))

@@ -81,7 +81,7 @@ def create_master_pdf(paths: PathConfig, month_year: datetime) -> None:
     )
 
 
-def main(input_excel_file_path: Path, output_folder_path: Path, local_sharepoint_folder_path: Path) -> None:
+def main(excel_file: Path, output_folder: Path, year_folder: Path) -> list[str]:
     """Create payslip PDFs from an Excel file."""
 
     sys.path.append("..")
@@ -92,11 +92,11 @@ def main(input_excel_file_path: Path, output_folder_path: Path, local_sharepoint
 
     # local_sharepoint_folder_path = get_local_sharepoint_folder()
 
-    paths = PathConfig(output_folder_path)
+    paths = PathConfig(output_folder)
 
     paths.create_output_dir()
 
-    sheet = load_excel_file(input_excel_file_path)
+    sheet = load_excel_file(excel_file)
 
     employee_blocks = get_employee_block(
         sheet,
@@ -118,4 +118,4 @@ def main(input_excel_file_path: Path, output_folder_path: Path, local_sharepoint
 
     password_protect_pdfs(paths)
 
-    return write_files_locally_in_sharepoint_folder(paths, local_sharepoint_folder_path)
+    return write_files_locally_in_sharepoint_folder(paths, year_folder)
